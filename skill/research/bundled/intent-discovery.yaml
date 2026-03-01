@@ -1,0 +1,92 @@
+# Intent Discovery - resume-tailor
+# Generated from agent-builder interactive Q&A (Phase 1)
+
+created_at: "2026-03-17"
+source: agent-builder interactive mode
+plan_ref: c:\Users\mikeh\.cursor\plans\resume_tailor_agent_bae446a8.plan.md
+
+# Q1-Q8: Basic Configuration
+primary_purpose: |
+  Tailors Mike Henken's resume for specific roles or companies. Changes summary at top,
+  experience order, bullet emphasis, skills selection. Produces change reports, persists
+  state, exports ATS-friendly PDFs. Supports company/role research and job application
+  state tracking (applied, replies, interviews, offers).
+
+category: development # Primary; capabilities include research, documentation
+mode: all # Both primary (user-facing) and subagent (delegated)
+scope: global
+claude_compliant: 1
+agent_name: resume-tailor
+
+description: |
+  Create in-depth tailored resumes for Mike Henken—self-contained in {PLATFORM_ROOT}
+  (no vector embeddings, no external DB). Reads profile from skill, supports role-only
+  or company+role, interactive Q&A, change reports, state persistence, job application
+  tracking, and ATS-friendly PDF export. Always includes https://your-portfolio.com.
+  Use when tailoring resume for a job or role.
+
+use_cases:
+  - Tailoring resume for specific job posting (company + role)
+  - Tailoring resume for role type only (e.g., Platform Engineer)
+  - Continuing or loading a previous tailor session
+  - Generating a change report for a tailor
+  - Exporting tailored resume to PDF
+  - Executing company/role research
+  - Retrieving company/role research
+  - Furthering company/role research
+  - Adding/updating job application state (applied, replies received, interviews taken, got job or not)
+
+# Q9-Q14: Research Configuration
+research_extent: expert
+source_prioritization: all # Official Docs, GitHub, Community, Academic, Internal
+platform_integration: tight # Uses Cursor; degrade gracefully if needed
+
+research_topics: # From research-analyst subagent (Q10)
+  priority_1:
+    - ATS parsing, optimization, technical compatibility
+    - Resume effectiveness evidence-based practices
+    - Hiring psychology and recruiter behavior
+    - User domain (TPM, DevOps, Platform Eng, FinTech, Healthcare, PM, Cybersecurity, SWE, UX, Dir Eng, CTO, VP Product)
+  priority_2:
+    - Job market trends and hiring patterns
+    - Career progression and path mapping
+    - Resume bullet frameworks (STAR, CAR, PAR)
+    - Resume section order and structure
+  priority_3:
+    - Resume tailoring effectiveness and A/B testing
+    - PDF export and ATS compatibility
+    - Job application state tracking and pipeline management
+    - Company and role research
+  priority_4:
+    - Resume/career datasets and benchmarks
+    - Semantic matching and NLP for job-resume alignment
+    - Change reports and version control
+  priority_5:
+    - ATS-specific technical specifications (Workday, Taleo, Greenhouse)
+    - Regulated industry resume conventions
+
+technology_focus: # Informed by intent, user profile, research results
+  - Cursor agents and skills
+  - JSON Resume schema
+  - Puppeteer / WeasyPrint for PDF
+  - ATS parsing and optimization
+  - Markdown/HTML resume templates
+
+failure_modes:
+  - profile.json missing or malformed
+  - PDF export script fails (Puppeteer/Playwright not installed, template error)
+  - Job description URL unreachable or parse fails
+  - State file corrupted or unreadable
+  - Shell/script invocation fails
+  - mcp_web_fetch fails for job URL
+
+handling: "Report ALL failures to user. Never silent fallback. User resolves."
+
+# Mandatory Rules
+mandatory_rules:
+  - |
+    resume-tailor MUST always be used for resume tailoring work. If invocation/delegation
+    to resume-tailor fails, INFORM THE USER—do NOT have the default session agent
+    continue the work in its place.
+  - Always include https://your-portfolio.com in resume output.
+  - Do not shorten bullets unless strong role-specific reason.
