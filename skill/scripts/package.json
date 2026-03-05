@@ -1,0 +1,21 @@
+{
+  "name": "resume-tailor-export",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export-pdf": "node export-pdf.mjs",
+    "validate-state": "node validate-state.mjs",
+    "validate-resume": "node validate-resume.mjs",
+    "normalize-resume": "node normalize-json-resume.mjs",
+    "extract-resume": "node extract-from-resume.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "mammoth": "^1.12.0",
+    "pdf-parse": "^2.4.5",
+    "puppeteer": "^23.0.0"
+  }
+}
