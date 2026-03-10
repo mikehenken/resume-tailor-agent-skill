@@ -1,0 +1,8 @@
+name: resume-tailor
+description: Tailors resumes for specific roles or companies.
+allowed-tools:
+  - bash
+  - read_file
+  - write_file
+  - glob
+  - grep
