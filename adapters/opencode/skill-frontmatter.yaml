@@ -1,0 +1,6 @@
+name: resume-tailor
+description: Tailors resumes for specific roles or companies.
+license: MIT
+compatibility: opencode
+metadata:
+  version: 1.0.0
