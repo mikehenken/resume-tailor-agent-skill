@@ -1,0 +1,35 @@
+{
+  "name": "@mikehenken/create-resume-tailor",
+  "version": "1.0.0",
+  "description": "AI-powered resume tailoring agent for Cursor, Claude Code, and OpenCode",
+  "main": "bin/cli.mjs",
+  "bin": {
+    "create-resume-tailor": "./bin/cli.mjs"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "node bin/cli.mjs --test",
+    "lint": "eslint skill/scripts/*.mjs bin/*.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikehenken/resume-tailor-agent-skill.git"
+  },
+  "homepage": "https://github.com/mikehenken/resume-tailor-agent-skill#readme",
+  "bugs": {
+    "url": "https://github.com/mikehenken/resume-tailor-agent-skill/issues"
+  },
+  "keywords": ["resume", "ai-agent", "cursor", "claude-code", "opencode", "json-resume", "ats", "career"],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "author": "Mike Henken",
+  "license": "MIT",
+  "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  }
+}
