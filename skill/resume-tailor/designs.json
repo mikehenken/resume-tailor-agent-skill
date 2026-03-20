@@ -1,0 +1,33 @@
+{
+  "defaultDesignId": "ats",
+  "designs": {
+    "ats": {
+      "label": "ATS classic (single-column, system fonts)",
+      "atsCompliant": true,
+      "styleFile": "ats.css",
+      "aliases": ["design-1", "classic", "default"],
+      "inspiredBy": "Internal default; aligns with resume-tailor ATS guidance"
+    },
+    "findmyprofession": {
+      "label": "Executive clean (Find My Profession–style VP sample)",
+      "atsCompliant": false,
+      "styleFile": "findmyprofession.css",
+      "aliases": ["design-2", "fmp", "vp-it-devops-sample"],
+      "inspiredBy": "https://www.findmyprofession.com/wp-content/uploads/2023/06/VP-of-ITDevOps-Resume-Sample.pdf"
+    },
+    "amin-ariana": {
+      "label": "Executive summary & web resume (Amin Ariana–style)",
+      "atsCompliant": false,
+      "styleFile": "amin-ariana.css",
+      "aliases": ["design-3", "ariana"],
+      "inspiredBy": "https://resume.aminariana.com/"
+    },
+    "alex-gervais": {
+      "label": "Technology leadership dense layout (Alexandre Gervais CV–style)",
+      "atsCompliant": false,
+      "styleFile": "alex-gervais.css",
+      "aliases": ["design-4", "gervais"],
+      "inspiredBy": "https://alexgervais.github.io/CV_Alexandre_Gervais_en.pdf"
+    }
+  }
+}

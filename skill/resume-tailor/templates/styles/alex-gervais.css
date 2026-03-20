@@ -1,0 +1,116 @@
+/* Dense leadership CV: uppercase section cues, multi-column skills block */
+@page {
+  size: letter;
+  margin: 0.55in 0.65in;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 10pt;
+  line-height: 1.38;
+  color: #0f0f0f;
+  max-width: 8.5in;
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  font-size: 16pt;
+  font-weight: 800;
+  margin: 0 0 0.1em 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.header-block {
+  margin-bottom: 0.85em;
+}
+.header-block .label {
+  font-size: 10pt;
+  font-weight: 700;
+  margin-bottom: 0.35em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #333;
+}
+.contact {
+  font-size: 9pt;
+  line-height: 1.45;
+}
+.contact .sep {
+  margin: 0 0.35em;
+  color: #666;
+}
+.contact a {
+  color: #0047ab;
+  text-decoration: underline;
+}
+h2 {
+  font-size: 10.5pt;
+  font-weight: 800;
+  margin: 0.85em 0 0.3em 0;
+  padding-bottom: 0.1em;
+  border-bottom: 1pt solid #000;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.summary {
+  margin-bottom: 0.65em;
+  text-align: left;
+}
+.work-item,
+.edu-item {
+  margin-bottom: 0.75em;
+}
+.work-title {
+  font-weight: 800;
+  font-size: 10.5pt;
+}
+.work-meta,
+.edu-meta {
+  font-size: 9.5pt;
+  color: #333;
+  margin-bottom: 0.2em;
+}
+.edu-title {
+  font-weight: 800;
+  font-size: 10.5pt;
+}
+.work-summary,
+.edu-summary {
+  margin-bottom: 0.25em;
+  font-style: italic;
+  font-size: 9.5pt;
+  color: #444;
+}
+.highlights {
+  margin: 0.1em 0 0 0;
+  padding-left: 1.1em;
+}
+.highlights li {
+  margin-bottom: 0.18em;
+}
+.skills-grid-wrap {
+  column-count: 2;
+  column-gap: 1.25em;
+}
+.skills-section {
+  margin-bottom: 0.4em;
+  break-inside: avoid;
+}
+.skills-name {
+  font-weight: 800;
+  font-size: 9.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.12em;
+}
+.skills-keywords {
+  font-size: 9.5pt;
+}
+.skills-keywords span::after {
+  content: ", ";
+}
+.skills-keywords span:last-child::after {
+  content: "";
+}

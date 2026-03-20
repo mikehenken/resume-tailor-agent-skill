@@ -1,0 +1,22 @@
+{
+  "basics": {
+    "name": "Norm Test",
+    "label": "Role"
+  },
+  "work": [
+    {
+      "name": "Acme",
+      "position": "Dev",
+      "startDate": "2020-01",
+      "endDate": null,
+      "url": ""
+    }
+  ],
+  "customRecommendations": [
+    {
+      "recommender": "Jane Q.",
+      "quote": "Excellent partner.",
+      "title": "VP"
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+/* Web-resume style: executive summary emphasis, readable prose, subtle separation */
+@page {
+  size: letter;
+  margin: 0.7in 0.8in;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  color: #111;
+  max-width: 8.5in;
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  font-size: 20pt;
+  font-weight: 700;
+  margin: 0 0 0.15em 0;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+.header-block {
+  margin-bottom: 1em;
+}
+.header-block .label {
+  font-size: 13pt;
+  font-weight: 400;
+  color: #333;
+  margin-bottom: 0.45em;
+}
+.contact {
+  font-size: 10pt;
+  line-height: 1.6;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.contact .sep {
+  margin: 0 0.35em;
+  color: #888;
+}
+.contact a {
+  color: #0b5cab;
+  text-decoration: underline;
+}
+h2 {
+  font-size: 12pt;
+  font-weight: 700;
+  margin: 1.15em 0 0.4em 0;
+  padding-bottom: 0.1em;
+  border-bottom: none;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #000;
+}
+.summary {
+  margin-bottom: 0.85em;
+  text-align: left;
+}
+.work-item,
+.edu-item {
+  margin-bottom: 1.05em;
+}
+.work-title {
+  font-weight: 700;
+  font-size: 11pt;
+}
+.work-meta,
+.edu-meta {
+  font-size: 10pt;
+  color: #444;
+  margin-bottom: 0.35em;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.edu-title {
+  font-weight: 700;
+  font-size: 11pt;
+}
+.work-summary,
+.edu-summary {
+  margin-bottom: 0.4em;
+  font-style: italic;
+  color: #555;
+  font-size: 10pt;
+}
+.highlights {
+  margin: 0.2em 0 0 0;
+  padding-left: 1.15em;
+}
+.highlights li {
+  margin-bottom: 0.28em;
+}
+.skills-section {
+  margin-bottom: 0.55em;
+}
+.skills-name {
+  font-weight: 700;
+  margin-bottom: 0.2em;
+  font-size: 10.5pt;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.skills-keywords {
+  font-size: 10pt;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.skills-keywords span::after {
+  content: ", ";
+}
+.skills-keywords span:last-child::after {
+  content: "";
+}

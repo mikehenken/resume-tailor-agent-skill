@@ -1,0 +1,117 @@
+/* Inspired by executive / VP resume samples: strong hierarchy, navy accents */
+@page {
+  size: letter;
+  margin: 0.65in 0.75in;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: Calibri, "Segoe UI", Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.4;
+  color: #1a1a1a;
+  max-width: 8.5in;
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  font-size: 22pt;
+  font-weight: 700;
+  margin: 0 0 0.2em 0;
+  letter-spacing: 0.02em;
+  color: #1a365d;
+  text-transform: none;
+}
+.header-block {
+  margin-bottom: 1.1em;
+  padding-bottom: 0.65em;
+  border-bottom: 2pt solid #1a365d;
+}
+.header-block .label {
+  font-size: 12pt;
+  font-weight: 600;
+  color: #2c5282;
+  margin-bottom: 0.5em;
+}
+.contact {
+  font-size: 10pt;
+  line-height: 1.55;
+  color: #333;
+}
+.contact .sep {
+  margin: 0 0.4em;
+  color: #718096;
+}
+.contact a {
+  color: #2b6cb0;
+  text-decoration: none;
+}
+h2 {
+  font-size: 12pt;
+  font-weight: 700;
+  margin: 1.1em 0 0.45em 0;
+  padding-bottom: 0.2em;
+  border-bottom: 1pt solid #cbd5e0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #1a365d;
+}
+.summary {
+  margin-bottom: 0.9em;
+  text-align: left;
+  color: #2d3748;
+}
+.work-item,
+.edu-item {
+  margin-bottom: 0.95em;
+}
+.work-title {
+  font-weight: 700;
+  font-size: 11pt;
+  color: #1a202c;
+}
+.work-meta,
+.edu-meta {
+  font-size: 10pt;
+  color: #4a5568;
+  margin-bottom: 0.3em;
+  font-weight: 500;
+}
+.edu-title {
+  font-weight: 700;
+  font-size: 11pt;
+}
+.work-summary,
+.edu-summary {
+  margin-bottom: 0.35em;
+  font-style: italic;
+  color: #4a5568;
+  font-size: 10pt;
+}
+.highlights {
+  margin: 0.15em 0 0 0;
+  padding-left: 1.2em;
+}
+.highlights li {
+  margin-bottom: 0.3em;
+}
+.skills-section {
+  margin-bottom: 0.45em;
+}
+.skills-name {
+  font-weight: 700;
+  font-size: 10pt;
+  color: #2c5282;
+  margin-bottom: 0.15em;
+}
+.skills-keywords {
+  font-size: 10pt;
+  color: #2d3748;
+}
+.skills-keywords span::after {
+  content: ", ";
+}
+.skills-keywords span:last-child::after {
+  content: "";
+}
