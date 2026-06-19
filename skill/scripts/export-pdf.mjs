@@ -99,7 +99,38 @@ async function main(argv) {
   }
 
   const basics = resume.basics || {};
-  resume.basics = basics;
+  if (!basics.url || basics.url === '') {
+    basics.url = 'https://mikehenken.pages.dev';
+  }
+  const profiles = Array.isArray(basics.profiles) ? basics.profiles : [];
+  const hasPortfolio = profiles.some(
+    (p) =>
+      p &&
+      (p.network === 'Personal Website' ||
+        (p.url && p.url.includes('mikehenken.pages.dev')))
+  );
+  if (!hasPortfolio) {
+    profiles.unshift({
+      network: 'Personal Website',
+      username: '',
+      url: 'https://mikehenken.pages.dev',
+    });
+    basics.profiles = profiles;
+  }
+  const hasLinkedIn = profiles.some(
+    (p) =>
+      p &&
+      (/linkedin/i.test(p.network || '') ||
+        (p.url && p.url.includes('linkedin')))
+  );
+  if (!hasLinkedIn) {
+    profiles.push({
+      network: 'LinkedIn',
+      username: 'mike-henken-72bb4428',
+      url: 'https://linkedin.com/in/mike-henken-72bb4428',
+    });
+    basics.profiles = profiles;
+  }
   resume.basics = basics;
 
   const designDef = manifest.designs[designId];

@@ -15,7 +15,7 @@ For **open source** and clear licensing, split **versioned system knowledge** fr
 |--------|------|---------|
 | **Skill root** | `{SKILL_ROOT}` — directory containing this `SKILL.md` | Shipped package: scripts, designs, **bundled research**. |
 | **Bundled research** | `{SKILL_ROOT}/research/bundled/*.md` | Maintainer-curated, generic ATS/domain/psychology/export references. Safe to publish. |
-| **User root** | `{USER_ROOT}` = `$RESUME_TAILOR_USER_DIR` if set, else `{PLATFORM_ROOT}/resume-tailor` | Private machine state: tailors, logs, **extension** markdown. **Do not** commit real profile/PII or employer intel to a public repo. |
+| **User root** | `{USER_ROOT}` = `$RESUME_TAILOR_USER_DIR` if set, else `~/.cursor/resume-tailor` | Private machine state: tailors, logs, **extension** markdown. **Do not** commit real profile/PII or employer intel to a public repo. |
 | **User extension research** | `{USER_ROOT}/research/extension/*.md` | Optional extra knowledge (company prep, niche domains). **Additive only** — use unique names (e.g. `user-bigco-prep-2026.md`); do not shadow bundled filenames. |
 
 **Canonical research paths:** `{SKILL_ROOT}/research/bundled/` (maintainer curated) and `{USER_ROOT}/research/extension/` (user add-ons). See `{SKILL_ROOT}/OPEN_SOURCE.md` for packaging and `.gitignore` hints.
@@ -27,7 +27,7 @@ For **open source** and clear licensing, split **versioned system knowledge** fr
 
 Documents follow the **[JSON Resume schema](https://jsonresume.org/schema)** (machine definition: [resume-schema `schema.json`](https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json)). The canonical copy may include `"$schema"` pointing at that URL. Root and nested objects allow **`additionalProperties`**, so extensions such as **`work[].keywords`** and **`references[].title`** remain valid.
 
-**Required in every tailored output** (from `profile.json` / user baseline): portfolio and LinkedIn URLs as today — e.g. `https://your-portfolio.com` and `https://linkedin.com/in/your-profile`.
+**Required in every tailored output** (from `profile.json` / user baseline): portfolio and LinkedIn URLs as today — e.g. `https://mikehenken.pages.dev` and `https://linkedin.com/in/mike-henken-72bb4428`.
 
 ### Profile baseline vs tailoring
 
@@ -75,7 +75,7 @@ Skills must be **highly informed** by target role, industry, and profile. Never 
 
 ## PDF export: multiple designs
 
-**Registry**: `{PLATFORM_ROOT}/skills/resume-tailor/designs.json` — canonical ids, aliases (`design-2` … `design-4`), `atsCompliant` flags, and inspiration links.
+**Registry**: `~/.cursor/skills/resume-tailor/designs.json` — canonical ids, aliases (`design-2` … `design-4`), `atsCompliant` flags, and inspiration links.
 
 | Id | Role | ATS-safe |
 |----|------|----------|
@@ -129,7 +129,7 @@ Expected CLI failure envelope:
 { "ok": false, "error": { "code": "RT_*", "message": "...", "details": {} } }
 ```
 
-**Storage**: `{PLATFORM_ROOT}/resume-tailor/tailors/{tailor-id}/state.json`
+**Storage**: `~/.cursor/resume-tailor/tailors/{tailor-id}/state.json`
 
 ## Change Report Format
 
@@ -142,7 +142,7 @@ Expected CLI failure envelope:
 
 ## Logging
 
-Per tailor: `{PLATFORM_ROOT}/resume-tailor/tailors/{tailor-id}/logs/`
+Per tailor: `~/.cursor/resume-tailor/tailors/{tailor-id}/logs/`
 - decisions.log, searches.log, changes.log, export.log
 
 ## Failure Handling

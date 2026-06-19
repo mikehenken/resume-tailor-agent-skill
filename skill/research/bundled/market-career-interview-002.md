@@ -372,7 +372,7 @@ The resume tailor agent should:
 ### Architecture: Master Resume + Tailored Variants
 
 ```
-{PLATFORM_ROOT}/resume-tailor/
+~/.cursor/resume-tailor/
 ├── master/
 │   └── master-resume.json          # Complete profile (all history, all skills)
 ├── bases/

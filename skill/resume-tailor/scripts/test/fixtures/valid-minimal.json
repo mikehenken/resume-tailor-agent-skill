@@ -1,8 +1,0 @@
-{
-  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
-  "basics": {
-    "name": "Fixture User",
-    "email": "fixture.user@example.com",
-    "label": "Engineer"
-  }
-}

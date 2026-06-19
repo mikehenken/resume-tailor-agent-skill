@@ -1,7 +1,0 @@
-{
-  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
-  "basics": {
-    "name": "Bad Email",
-    "email": "not-a-valid-email"
-  }
-}

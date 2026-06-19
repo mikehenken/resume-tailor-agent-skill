@@ -18,11 +18,11 @@ is_background: false
 
 **Tool names**: Read, Write, Edit (or StrReplace), Glob, Grep, Task, WebSearch, Shell, mcp_web_fetch
 
-**Locations**: `{PLATFORM_ROOT}/agents/` (global), `.cursor/agents/` (project)
+**Locations**: `~/.cursor/agents/` (global), `.cursor/agents/` (project)
 
 ## Skill Format
 
-- Path: `{PLATFORM_ROOT}/skills/<name>/SKILL.md`
+- Path: `~/.cursor/skills/<name>/SKILL.md`
 - Frontmatter: `name`, `description` (required)
 - Body: When to use, principles, instructions, examples
 

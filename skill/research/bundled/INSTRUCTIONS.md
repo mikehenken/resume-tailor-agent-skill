@@ -5,7 +5,7 @@
 | Layer | Location | Purpose |
 |--------|----------|---------|
 | **Bundled (system)** | `{SKILL_ROOT}/research/bundled/` | Shipped with the package; generic ATS, domains, psychology, export rules. Versioned with releases. |
-| **User extension** | `{RESUME_TAILOR_USER_DIR}/research/extension/` default `{PLATFORM_ROOT}/resume-tailor/research/extension/` | Private add-ons: company-specific prep, interview banks, niche certifications, local job-market notes. **Never** committed to the public repo. |
+| **User extension** | `{RESUME_TAILOR_USER_DIR}/research/extension/` default `~/.cursor/resume-tailor/research/extension/` | Private add-ons: company-specific prep, interview banks, niche certifications, local job-market notes. **Never** committed to the public repo. |
 
 `RESUME_TAILOR_USER_DIR` may be set to relocate user state (e.g. `~/.config/resume-tailor`).
 
@@ -23,16 +23,16 @@
 
 1. Add or revise markdown in **`research/bundled/`**; cite sources; note limitations and date.  
 2. Update **`README.md`** / this index if filenames change.  
-3. Update **`SKILL.md`** and **`{PLATFORM_ROOT}/agents/resume-tailor.md`** when behavior or path contracts change.  
+3. Update **`SKILL.md`** and **`~/.cursor/agents/resume-tailor.md`** when behavior or path contracts change.  
 4. Keep **`profile.json`** (or user-supplied profile path) out of bundled research—profile is user data.  
-5. **Do not** maintain a **`{PLATFORM_ROOT}/agents/resume-tailor/`** subdirectory tree for research or redirects — it is not shipped with the skill and duplicates **`OPEN_SOURCE.md`**. Open-source consumers track the **skill** tree only; optional single-file **`{PLATFORM_ROOT}/agents/resume-tailor.md`** is install glue only (`OPEN_SOURCE.md`).
+5. **Do not** maintain a **`~/.cursor/agents/resume-tailor/`** subdirectory tree for research or redirects — it is not shipped with the skill and duplicates **`OPEN_SOURCE.md`**. Open-source consumers track the **skill** tree only; optional single-file **`~/.cursor/agents/resume-tailor.md`** is install glue only (`OPEN_SOURCE.md`).
 
 ## User extension (downstream)
 
 Consumers add optional markdown under:
 
 ```
-${RESUME_TAILOR_USER_DIR:-{PLATFORM_ROOT}/resume-tailor}/research/extension/
+${RESUME_TAILOR_USER_DIR:-~/.cursor/resume-tailor}/research/extension/
 ```
 
 **Convention:** use **unique filenames** (e.g. `user-acme-corp-prep-2026.md`) so you never shadow a bundled doc name. The agent reads bundled docs by default; user extension docs are **additive** context when relevant to the session.

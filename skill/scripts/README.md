@@ -33,7 +33,7 @@
 **Invocation**:
 
 ```bash
-cd {PLATFORM_ROOT}/skills/resume-tailor/scripts
+cd ~/.cursor/skills/resume-tailor/scripts
 npm install
 node export-pdf.mjs <input-json-path> [--design=<id>]
 # Optional explicit output:
@@ -53,7 +53,7 @@ node export-pdf.mjs <input-json-path> <output.pdf> [--design=amin-ariana]
 **Purpose:** Validate a resume-tailor **`state.json`** against the canonical schema in `lib/state-schema.mjs` (same checks `export-pdf.mjs` applies to state-shaped inputs).
 
 ```bash
-npm run validate-state -- {PLATFORM_ROOT}/resume-tailor/tailors/<id>/state.json
+npm run validate-state -- ~/.cursor/resume-tailor/tailors/<id>/state.json
 # or: node validate-state.mjs <path-to-state.json>
 ```
 

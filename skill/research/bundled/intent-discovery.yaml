@@ -19,10 +19,10 @@ claude_compliant: 1
 agent_name: resume-tailor
 
 description: |
-  Create in-depth tailored resumes for Mike Henken—self-contained in {PLATFORM_ROOT}
+  Create in-depth tailored resumes for Mike Henken—self-contained in ~/.cursor
   (no vector embeddings, no external DB). Reads profile from skill, supports role-only
   or company+role, interactive Q&A, change reports, state persistence, job application
-  tracking, and ATS-friendly PDF export. Always includes https://your-portfolio.com.
+  tracking, and ATS-friendly PDF export. Always includes https://mikehenken.pages.dev.
   Use when tailoring resume for a job or role.
 
 use_cases:
@@ -88,5 +88,5 @@ mandatory_rules:
     resume-tailor MUST always be used for resume tailoring work. If invocation/delegation
     to resume-tailor fails, INFORM THE USER—do NOT have the default session agent
     continue the work in its place.
-  - Always include https://your-portfolio.com in resume output.
+  - Always include https://mikehenken.pages.dev in resume output.
   - Do not shorten bullets unless strong role-specific reason.
