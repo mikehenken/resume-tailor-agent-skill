@@ -15,8 +15,8 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 program
   .option('--test', 'Run in test/dry-run mode')
   .option('--platform <type>', 'Platform: cursor | claude | opencode')
-  .option('--location <type>', 'Install location: global | project | custom')
-  .option('--custom-path <path>', 'Custom skill install directory (with --location custom)')
+  .option('--install-location <type>', 'Install location: global | project | custom')
+  .option('--custom-path <path>', 'Custom skill install directory (with --install-location custom)')
   .option(
     '--resume <source>',
     'Profile seed: none | example | path to PDF/DOCX/TXT/MD/JSON'
@@ -130,7 +130,7 @@ async function run() {
   }
 
   const installType =
-    options.location ||
+    options.installLocation ||
     (options.yes
       ? 'global'
       : await select({

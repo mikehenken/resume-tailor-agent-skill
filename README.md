@@ -38,7 +38,7 @@ npx @mikehenken/create-resume-tailor
 Non-interactive Claude Code global install (example profile + PDF deps):
 
 ```bash
-npx @mikehenken/create-resume-tailor --platform claude --location global --resume example --yes
+npx @mikehenken/create-resume-tailor --platform claude --install-location global --resume example --yes
 ```
 
 From a local clone:
@@ -52,7 +52,7 @@ node bin/cli.mjs --platform claude --yes
 
 The installer will ask (unless `--yes`):
 1. **Platform**: Cursor, Claude Code, or OpenCode.
-2. **Location**: Global or Project-scoped.
+2. **Location**: Global or Project-scoped (`--install-location`).
 3. **Resume**: none / example / import file.
 4. **Resume Export Tools**: Installs PDF dependencies.
 
