@@ -23,5 +23,7 @@ jobs:
         run: cd skill/scripts && npm ci
       - name: Run skill tests
         run: cd skill/scripts && npm test
+      - name: Build and verify Claude plugin
+        run: npm run build:plugin && node --test test/build-plugin.test.mjs
       - name: CLI dry-run
         run: node bin/cli.mjs --test

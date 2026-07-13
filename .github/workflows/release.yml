@@ -33,9 +33,16 @@ jobs:
     needs: publish
     steps:
       - uses: actions/checkout@v4
-      - name: Build platform bundles
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install script dependencies
+        run: cd skill/scripts && npm ci
+      - name: Build platform bundles and Claude plugin ZIP
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
+          PLUGIN_VERSION=${VERSION#v}
+          node bin/build-plugin.mjs --version="$PLUGIN_VERSION"
           for PLATFORM in cursor claude opencode; do
             mkdir -p "dist/${PLATFORM}"
             cp -r skill/ "dist/${PLATFORM}/skill/"
@@ -50,4 +57,5 @@ jobs:
             resume-tailor-cursor-*.tar.gz
             resume-tailor-claude-*.tar.gz
             resume-tailor-opencode-*.tar.gz
+            resume-tailor-plugin-v*.zip
           generate_release_notes: true

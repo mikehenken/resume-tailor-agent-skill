@@ -79,6 +79,19 @@ After install, in Claude/Cursor:
 
 Each tailor stores `profile_id` so concurrent sessions for different candidates stay isolated.
 
+### Claude Code / Cowork plugin (v1.2+)
+
+Download **`resume-tailor-plugin-v*.zip`** from [GitHub Releases](https://github.com/mikehenken/resume-tailor-agent-skill/releases) and upload in **Plugins**, or:
+
+```bash
+claude plugin marketplace add mikehenken/resume-tailor-agent-skill
+claude plugin install resume-tailor@mikehenken-resume-tailor
+```
+
+**Portable user data** (no `~/.claude` required): profiles and tailors live in `./.resume-tailor` in your workspace, or set `RESUME_TAILOR_USER_DIR` to a granted folder in Cowork. **No setup scripts** — say *"Onboard me from this resume"* or *"Tailor for …"* in chat; the agent creates folders automatically.
+
+Build plugin locally: `npm run build:plugin`
+
 ## Usage
 
 1. Open your configured CLI/IDE (e.g. `claude`, `opencode`, or Cursor command palette).

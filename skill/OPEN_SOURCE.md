@@ -13,7 +13,7 @@ On a developer machine, optional **`{PLATFORM_ROOT}/agents/resume-tailor.md`** (
 
 ## What stays on the machine (user)
 
-- **`profiles/{id}/profile.json`** — canonical resume JSON per candidate; under `{PLATFORM_ROOT}/resume-tailor` or `$RESUME_TAILOR_USER_DIR` (avoid committing real PII into the skill tree).
+- **`profiles/{id}/profile.json`** — canonical resume JSON per candidate; under `./.resume-tailor`, `~/.resume-tailor`, or `$RESUME_TAILOR_USER_DIR` (avoid committing real PII into the skill tree).
 - **`config.json`** — optional `{ "defaultProfileId": "…" }` for **new** unnamed sessions only (not mid-tailor identity).
 - **`tailors/`** — session state (`profile_id` required on new states), change reports, PDFs
 - **`research/extension/`** — private markdown extra knowledge (mirrors `research/bundled/` on the skill side)
@@ -21,7 +21,9 @@ On a developer machine, optional **`{PLATFORM_ROOT}/agents/resume-tailor.md`** (
 
 Environment:
 
-- **`RESUME_TAILOR_USER_DIR`** — optional; defaults to `{PLATFORM_ROOT}/resume-tailor` (e.g. `~/.claude/resume-tailor`, `~/.cursor/resume-tailor`)
+- **`RESUME_TAILOR_USER_DIR`** — optional override for all user data (Cowork granted folder, custom path)
+- **Default user root** — `./.resume-tailor` (workspace); scripts also detect legacy `~/.claude/resume-tailor`, `~/.cursor/resume-tailor`, `~/.resume-tailor`
+- **`RESUME_TAILOR_SKILL_DIR`** — optional; plugin/Cowork can point at `$CLAUDE_PLUGIN_DIR/skills/resume-tailor`
 
 ## `.gitignore` suggestion (when this skill lives in a git repo)
 

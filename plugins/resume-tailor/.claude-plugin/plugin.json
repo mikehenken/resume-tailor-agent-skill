@@ -1,0 +1,12 @@
+{
+  "name": "resume-tailor",
+  "description": "Multi-profile resume tailoring with guarded edits, research-backed ATS optimization, and browser-free PDF export fallback. Works in Claude Code, Cowork, and cloud when using workspace .resume-tailor data.",
+  "version": "1.2.1",
+  "author": {
+    "name": "Mike Henken",
+    "url": "https://github.com/mikehenken"
+  },
+  "homepage": "https://github.com/mikehenken/resume-tailor-agent-skill",
+  "repository": "https://github.com/mikehenken/resume-tailor-agent-skill",
+  "license": "MIT"
+}

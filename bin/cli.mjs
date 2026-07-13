@@ -12,6 +12,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, '..');
 
+/**
+ * @param {string} md
+ * @returns {string}
+ */
+function stripYamlFrontmatter(md) {
+  if (!md.startsWith('---\n')) {
+    return md;
+  }
+  const end = md.indexOf('\n---\n', 4);
+  if (end === -1) {
+    return md;
+  }
+  return md.slice(end + 5).replace(/^\n+/, '');
+}
+
 program
   .option('--test', 'Run in test/dry-run mode')
   .option('--platform <type>', 'Platform: cursor | claude | opencode')
@@ -252,7 +267,12 @@ async function run() {
       ? path.join(path.dirname(targetDir), 'agents')
       : path.join(platformRootFs, 'agents');
 
-  const userRootFs = path.join(platformRootFs, 'resume-tailor');
+  const userRootFs =
+    installType === 'global'
+      ? path.join(homedir, '.resume-tailor')
+      : path.join(cwd, '.resume-tailor');
+
+  const userRootConfig = installType === 'global' ? '~/.resume-tailor' : './.resume-tailor';
 
   const resumeSource = await resolveChoice({
     flagValue: options.resume,
@@ -344,7 +364,6 @@ async function run() {
         ? `.${platformChoice === 'opencode' ? 'opencode' : platformChoice}`
         : platformRootFs.replace(/\\/g, '/');
 
-  const userRootConfig = `${platformRootConfig}/resume-tailor`;
   const skillRootConfig = targetDir.replace(/\\/g, '/');
 
   /** @type {unknown} */
@@ -407,8 +426,8 @@ async function run() {
   const { portfolio, linkedin } = urlsFromProfile(seededProfile);
 
   let finalAgent = agentTmpl.replace('{AGENT_BODY}', agentBody);
-  let finalSkillMd = fs.readFileSync(path.join(targetDir, 'SKILL.md'), 'utf-8');
-
+  const skillBody = stripYamlFrontmatter(fs.readFileSync(path.join(targetDir, 'SKILL.md'), 'utf-8'));
+  let finalSkillMd = `---\n${frontmatterYaml}---\n\n${skillBody}`;
   finalAgent = finalAgent.replace(/\{PLATFORM_ROOT\}/g, platformRootConfig);
   finalAgent = finalAgent.replace(/\{USER_ROOT\}/g, userRootConfig);
   finalAgent = finalAgent.replace(/\{SKILL_ROOT\}/g, skillRootConfig);
@@ -422,7 +441,6 @@ async function run() {
     );
   }
 
-  finalSkillMd = `---\n${frontmatterYaml}---\n\n` + finalSkillMd;
   finalSkillMd = finalSkillMd.replace(/\{PLATFORM_ROOT\}/g, platformRootConfig);
   finalSkillMd = finalSkillMd.replace(/\{USER_ROOT\}/g, userRootConfig);
   finalSkillMd = finalSkillMd.replace(/\{SKILL_ROOT\}/g, skillRootConfig);

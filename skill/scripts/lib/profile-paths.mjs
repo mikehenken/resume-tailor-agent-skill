@@ -13,6 +13,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { ensureUserDataLayoutAt, resolveUserRoot, resolveSkillRoot } from './user-paths.mjs';
 
 /**
  * @param {string} value
@@ -59,7 +60,7 @@ export function readUserConfig(userRoot) {
  * @param {{ defaultProfileId?: string }} config
  */
 export function writeUserConfig(userRoot, config) {
-  fs.mkdirSync(userRoot, { recursive: true });
+  const { userRoot: root } = ensureUserDataLayoutAt(userRoot);
   const out = {};
   if (
     typeof config.defaultProfileId === 'string' &&
@@ -68,7 +69,7 @@ export function writeUserConfig(userRoot, config) {
     out.defaultProfileId = config.defaultProfileId.trim();
   }
   fs.writeFileSync(
-    path.join(userRoot, 'config.json'),
+    path.join(root, 'config.json'),
     JSON.stringify(out, null, 2) + '\n',
     'utf8'
   );
@@ -167,6 +168,31 @@ export function resolveProfilePath(opts) {
 }
 
 /**
+ * Resolve profile path using default user/skill roots from cwd and env.
+ *
+ * @param {{
+ *   cwd?: string,
+ *   userRoot?: string,
+ *   skillRoot?: string,
+ *   scriptsDir?: string,
+ *   profileId?: string | null,
+ * }} [opts]
+ * @returns {{ userRoot: string, skillRoot: string | undefined, profileId: string | null, profilePath: string | null, source: string }}
+ */
+export function resolveProfileForWorkspace(opts = {}) {
+  const userRoot = opts.userRoot ?? resolveUserRoot(opts.cwd);
+  const skillRoot =
+    opts.skillRoot ??
+    (opts.scriptsDir ? resolveSkillRoot(path.join(opts.scriptsDir, '..')) : undefined);
+  const resolved = resolveProfilePath({
+    userRoot,
+    skillRoot,
+    profileId: opts.profileId,
+  });
+  return { userRoot, skillRoot, ...resolved };
+}
+
+/**
  * @param {string} userRoot
  * @param {string} profileId
  * @param {unknown} profileJson
@@ -174,13 +200,14 @@ export function resolveProfilePath(opts) {
  * @returns {string} absolute path written
  */
 export function writeProfile(userRoot, profileId, profileJson, opts = {}) {
+  const { userRoot: root } = ensureUserDataLayoutAt(userRoot);
   const id = slugifyProfileId(profileId);
-  const dir = path.join(userRoot, 'profiles', id);
+  const dir = path.join(root, 'profiles', id);
   fs.mkdirSync(dir, { recursive: true });
   const profilePath = path.join(dir, 'profile.json');
   fs.writeFileSync(profilePath, JSON.stringify(profileJson, null, 2) + '\n', 'utf8');
   if (opts.setDefault) {
-    writeUserConfig(userRoot, { defaultProfileId: id });
+    writeUserConfig(root, { defaultProfileId: id });
   }
   return profilePath;
 }

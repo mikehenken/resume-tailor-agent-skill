@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import {
   listProfileIds,
   readUserConfig,
+  resolveProfileForWorkspace,
   resolveProfilePath,
   slugifyProfileId,
   writeProfile,
@@ -64,6 +65,47 @@ test('resolveProfilePath prefers legacy user profile when no multi-profile defau
     const resolved = resolveProfilePath({ userRoot: root });
     assert.equal(resolved.source, 'legacy-user');
     assert.equal(resolved.profilePath, legacy);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('resolveProfileForWorkspace uses RESUME_TAILOR_USER_DIR', () => {
+  const custom = fs.mkdtempSync(path.join(os.tmpdir(), 'rt-workspace-'));
+  const prev = process.env.RESUME_TAILOR_USER_DIR;
+  process.env.RESUME_TAILOR_USER_DIR = custom;
+  try {
+    writeProfile(custom, 'jordan-lee', {
+      basics: { name: 'Jordan Lee' },
+      work: [],
+      skills: [],
+    });
+    const resolved = resolveProfileForWorkspace({ profileId: 'jordan-lee' });
+    assert.equal(resolved.userRoot, path.resolve(custom));
+    assert.equal(resolved.profileId, 'jordan-lee');
+    assert.equal(resolved.source, 'profiles');
+  } finally {
+    if (prev === undefined) {
+      delete process.env.RESUME_TAILOR_USER_DIR;
+    } else {
+      process.env.RESUME_TAILOR_USER_DIR = prev;
+    }
+    fs.rmSync(custom, { recursive: true, force: true });
+  }
+});
+
+test('writeProfile auto-creates user data layout', () => {
+  const root = path.join(os.tmpdir(), `rt-autolayout-${Date.now()}`);
+  assert.equal(fs.existsSync(root), false);
+  try {
+    writeProfile(root, 'test-candidate', {
+      basics: { name: 'Test' },
+      work: [],
+      skills: [],
+    });
+    assert.ok(fs.existsSync(path.join(root, 'profiles', 'test-candidate', 'profile.json')));
+    assert.ok(fs.existsSync(path.join(root, 'tailors')));
+    assert.ok(fs.existsSync(path.join(root, 'research', 'extension', 'README.md')));
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

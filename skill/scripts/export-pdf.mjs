@@ -142,15 +142,82 @@ async function main(argv) {
   const htmlPath = join(dirname(outputPath), '_resume_temp.html');
   writeFileSync(htmlPath, templateHtml, 'utf-8');
 
+  /** @type {'puppeteer' | 'pdfkit' | 'html-only'} */
+  let engine = 'puppeteer';
+
+  try {
+    await exportWithPuppeteer(htmlPath, outputPath);
+  } catch (puppeteerErr) {
+    const isAts = designId === 'ats';
+    if (isAts) {
+      try {
+        const { exportAtsPdfWithPdfkit } = await import('./lib/export-pdf-ats-pdfkit.mjs');
+        await exportAtsPdfWithPdfkit(resume, outputPath);
+        engine = 'pdfkit';
+        console.warn(
+          '[resume-tailor] Puppeteer unavailable; used pdfkit ATS export (browser-free).',
+          puppeteerErr instanceof Error ? puppeteerErr.message : puppeteerErr
+        );
+      } catch (pdfkitErr) {
+        const htmlFallback = outputPath.replace(/\.pdf$/i, '') + '.html';
+        writeFileSync(htmlFallback, templateHtml, 'utf-8');
+        engine = 'html-only';
+        try {
+          unlinkSync(htmlPath);
+        } catch (_) {}
+        throw makeError(
+          'RT_EXPORT_FALLBACK_HTML',
+          'PDF engines unavailable; wrote HTML fallback for print-to-PDF.',
+          {
+            htmlPath: htmlFallback,
+            puppeteerError:
+              puppeteerErr instanceof Error ? puppeteerErr.message : String(puppeteerErr),
+            pdfkitError: pdfkitErr instanceof Error ? pdfkitErr.message : String(pdfkitErr),
+          }
+        );
+      }
+    } else {
+      const htmlFallback = outputPath.replace(/\.pdf$/i, '') + `_${designId}.html`;
+      writeFileSync(htmlFallback, templateHtml, 'utf-8');
+      engine = 'html-only';
+      try {
+        unlinkSync(htmlPath);
+      } catch (_) {}
+      throw makeError(
+        'RT_EXPORT_VISUAL_NEEDS_PUPPETEER',
+        'Visual design requires Puppeteer; wrote HTML fallback. Install puppeteer or use --design=ats for pdfkit.',
+        {
+          htmlPath: htmlFallback,
+          designId,
+          reason: puppeteerErr instanceof Error ? puppeteerErr.message : String(puppeteerErr),
+        }
+      );
+    }
+  } finally {
+    if (engine === 'puppeteer') {
+      try {
+        unlinkSync(htmlPath);
+      } catch (_) {}
+    }
+  }
+
+  console.log('PDF written to:', outputPath);
+  console.log('Design:', designId, '(' + (designDef?.label || '') + ')');
+  console.log('Export engine:', engine);
+}
+
+/**
+ * @param {string} htmlPath
+ * @param {string} outputPath
+ */
+async function exportWithPuppeteer(htmlPath, outputPath) {
   let puppeteer;
   try {
     puppeteer = await import('puppeteer');
-  } catch {
-    try {
-      unlinkSync(htmlPath);
-    } catch (_) {}
+  } catch (err) {
     throw makeError('RT_DEPENDENCY_MISSING', 'Puppeteer not installed.', {
-      action: 'Run: cd scripts && npm install',
+      action: 'Run: cd scripts && npm install — or use ATS design for pdfkit fallback',
+      reason: err instanceof Error ? err.message : String(err),
     });
   }
 
@@ -170,13 +237,7 @@ async function main(argv) {
     });
   } finally {
     await browser.close();
-    try {
-      unlinkSync(htmlPath);
-    } catch (_) {}
   }
-
-  console.log('PDF written to:', outputPath);
-  console.log('Design:', designId, '(' + (designDef?.label || '') + ')');
 }
 
 await runCli(main, { defaultCode: 'RT_EXPORT_FAILED' });

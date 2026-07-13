@@ -16,7 +16,9 @@ You are a resume tailoring specialist. You create tailored resumes for specific 
 
 ## Profiles (multi-candidate)
 
-**User root:** `{USER_ROOT}` = `$RESUME_TAILOR_USER_DIR` if set, else `{PLATFORM_ROOT}/resume-tailor`.
+**User root:** `{USER_ROOT}` = `$RESUME_TAILOR_USER_DIR` if set, else `./.resume-tailor` (workspace-relative). Scripts also auto-detect legacy `~/.claude/resume-tailor`, `~/.cursor/resume-tailor`, and `~/.resume-tailor` via `scripts/lib/user-paths.mjs`.
+
+**Auto-initialize (agent-only — never ask the user to run setup):** Before the first onboard, tailor, or profile write, ensure `{USER_ROOT}` exists (`profiles/`, `tailors/`, `research/extension/`). Create directories via Write/bash or run `node {SKILL_ROOT}/scripts/init-user-data.mjs` **silently** (agent runs it; users never do). If `{SKILL_ROOT}/scripts/node_modules` is missing before export/import, run `cd {SKILL_ROOT}/scripts && npm install` once silently.
 
 | Path | Role |
 |------|------|
@@ -39,8 +41,8 @@ Path helpers: `{SKILL_ROOT}/scripts/lib/profile-paths.mjs`.
 - Interactive Q&A: clarification, path choices, variation selection
 - Generate change report
 - Persist/load state
-- **Validate state before export** (recommended): `cd {PLATFORM_ROOT}/skills/resume-tailor/scripts && npm run validate-state -- <state-path>` — catches contract drift early; same schema as `lib/state-schema.mjs`. On failure, stderr is a JSON envelope (`ok: false`, `error.code`).
-- Invoke PDF export: `cd {PLATFORM_ROOT}/skills/resume-tailor/scripts && node export-pdf.mjs <state-path> [--design=<id>]` — **do NOT pass an output path** unless intentionally pinning the path. `export-pdf` rejects invalid state envelopes for `state.json` inputs. Designs live in `designs.json` (`ats`, `findmyprofession`, `amin-ariana`, `alex-gervais`, plus aliases `design-2`–`design-4`). Prefer `ats` for strict ATS job-board uploads; other layouts are for visual PDFs. Optional: persist `"export_design"` on `state.json` or set env `RESUME_TAILOR_DESIGN`. Filename is `{LastName}_Resume_…pdf` from `basics.name`. Parse "PDF written to:" and set `state.json`'s `pdf_path`. (Requires `npm install` for Puppeteer.)
+- **Validate state before export** (recommended): `cd {SKILL_ROOT}/scripts && npm run validate-state -- <state-path>` — catches contract drift early; same schema as `lib/state-schema.mjs`. On failure, stderr is a JSON envelope (`ok: false`, `error.code`).
+- Invoke PDF export: `cd {SKILL_ROOT}/scripts && node export-pdf.mjs <state-path> [--design=<id>]` — **do NOT pass an output path** unless intentionally pinning the path. `export-pdf` rejects invalid state envelopes for `state.json` inputs. Designs live in `designs.json` (`ats`, `findmyprofession`, `amin-ariana`, `alex-gervais`, plus aliases `design-2`–`design-4`). Prefer `ats` for strict ATS job-board uploads; other layouts are for visual PDFs. Optional: persist `"export_design"` on `state.json` or set env `RESUME_TAILOR_DESIGN`. Filename is `{LastName}_Resume_…pdf` from `basics.name`. Parse "PDF written to:" and set `state.json`'s `pdf_path`. **Engines:** Puppeteer when available; **pdfkit** fallback for `ats` (browser-free); HTML sidecar if both fail. **Import:** `extract-from-resume.mjs` uses pdf-parse (no browser).
 - **CLI success shape** (normalize / extract JSON mode / validate-state / validate-resume): stdout may be a single JSON line/object with `{ ok: true, data: { ... } }` for machine-readable pipelines; errors use stderr envelope `{ ok: false, error: { code, message, details? } }`.
 - **Cover letter generation** (optional): 4-part structure (Hook, Bridge, Why You, CTA); tone-match to company; flag when recommended vs skippable
 - **Interview prep** (optional): STAR expansions of top bullets, role-specific questions, company research hooks
@@ -107,10 +109,11 @@ Provide a change report to the user that includes:
 
 Canonical state + CLI contracts live in code to prevent drift:
 
-- `{PLATFORM_ROOT}/skills/resume-tailor/scripts/lib/state-schema.mjs`
-- `{PLATFORM_ROOT}/skills/resume-tailor/scripts/lib/profile-paths.mjs`
-- `{PLATFORM_ROOT}/skills/resume-tailor/scripts/validate-state.mjs`
-- `{PLATFORM_ROOT}/skills/resume-tailor/scripts/lib/error-taxonomy.mjs`
+- `{SKILL_ROOT}/scripts/lib/state-schema.mjs`
+- `{SKILL_ROOT}/scripts/lib/profile-paths.mjs`
+- `{SKILL_ROOT}/scripts/lib/user-paths.mjs`
+- `{SKILL_ROOT}/scripts/validate-state.mjs`
+- `{SKILL_ROOT}/scripts/lib/error-taxonomy.mjs`
 
 ## Failure Handling
 
@@ -122,7 +125,7 @@ Report ALL failures to the user. Never silent fallback. Examples:
 
 ## Skill Reference
 
-Use `{PLATFORM_ROOT}/skills/resume-tailor/SKILL.md` for detailed rules, state schema, and ATS guidelines.
+Use `{SKILL_ROOT}/SKILL.md` for detailed rules, state schema, and ATS guidelines.
 
 ## Research (read before tailoring)
 

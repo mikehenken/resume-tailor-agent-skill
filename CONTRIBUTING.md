@@ -7,8 +7,24 @@ Thank you for your interest in contributing to the Resume Tailor agent skill!
 This repository is designed to be multi-platform. Below is a high-level overview:
 
 - `/bin/cli.mjs` - The NPX interactive installer
+- `/bin/build-plugin.mjs` - Assembles `plugins/resume-tailor/` and release ZIP
 - `/skill/` - The canonical skill directory (this is what gets installed on the user's machine)
 - `/adapters/` - The platform-specific templates (Cursor, Claude Code, OpenCode)
+- `/plugins/resume-tailor/` - Claude Code / Cowork plugin template (built by `build:plugin`)
+- `/.claude-plugin/marketplace.json` - Marketplace manifest for `claude plugin marketplace add`
+
+### User data (portable)
+
+End users **never run setup scripts**. The agent creates `./.resume-tailor` (or `RESUME_TAILOR_USER_DIR`) on first chat action. Scripts resolve paths via `skill/scripts/lib/user-paths.mjs`.
+
+### Claude plugin
+
+```bash
+npm run build:plugin
+# → plugins/resume-tailor/ staged + resume-tailor-plugin-v{version}.zip at repo root
+```
+
+Release workflow attaches the ZIP to GitHub Releases. Plugin paths use `$CLAUDE_PLUGIN_DIR/skills/resume-tailor` in built artifacts.
 
 ### Adding a New Platform
 
@@ -36,7 +52,7 @@ Please ensure all tests pass before opening a Pull Request.
 Tagged releases (`v*`) run `.github/workflows/release.yml`, which:
 
 1. Publishes `@mikehenken/create-resume-tailor` to the **public npmjs** registry
-2. Builds per-platform tarballs and creates a GitHub Release
+2. Builds per-platform tarballs, **Claude plugin ZIP**, and creates a GitHub Release
 
 **Required repo secret:** `NPM_TOKEN` — an npm [Automation](https://docs.npmjs.com/about-access-tokens) access token for an account that can publish the `@mikehenken` scope (or the unscoped package name if you rename later).
 

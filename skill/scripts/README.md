@@ -33,18 +33,22 @@
 **Invocation**:
 
 ```bash
-cd ~/.cursor/skills/resume-tailor/scripts
+cd skill/scripts
 npm install
 node export-pdf.mjs <input-json-path> [--design=<id>]
 # Optional explicit output:
 node export-pdf.mjs <input-json-path> <output.pdf> [--design=amin-ariana]
 ```
 
+**User data paths** (resolved by agent / `lib/user-paths.mjs`): `./.resume-tailor/tailors/{id}/state.json`, or `RESUME_TAILOR_USER_DIR`, or legacy `~/.claude/resume-tailor`. No manual init — agent creates layout on first use.
+
 **Design resolution**: `--design` → `export_design` on parsed JSON → env `RESUME_TAILOR_DESIGN` → `ats`.
 
 **Filename** (auto): `{LastName}_Resume_{RoleSlug}_{CompanySlug}_{Date}.pdf`, or with `_{designId}` before `.pdf` when design ≠ `ats`. Last name comes from `basics.name` (or `profile_id`).
 
-**Requirements**: Puppeteer (`npm install`).
+**Engines**: Puppeteer when available; **pdfkit** automatic fallback for `ats` (Cowork/sandbox); HTML sidecar if both fail.
+
+**Requirements**: `npm install` in `scripts/` (agent may run this silently on first export).
 
 **HTML assembly**: `templates/styles/{design}.css` + `partials/render-body.js` (no `template.html` at runtime).
 
@@ -53,7 +57,7 @@ node export-pdf.mjs <input-json-path> <output.pdf> [--design=amin-ariana]
 **Purpose:** Validate a resume-tailor **`state.json`** against the canonical schema in `lib/state-schema.mjs` (same checks `export-pdf.mjs` applies to state-shaped inputs).
 
 ```bash
-npm run validate-state -- ~/.cursor/resume-tailor/tailors/<id>/state.json
+npm run validate-state -- ./.resume-tailor/tailors/<id>/state.json
 # or: node validate-state.mjs <path-to-state.json>
 ```
 

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "mikehenken-resume-tailor",
+  "description": "Resume Tailor — multi-profile tailoring, ATS PDF export, Cowork/Code compatible",
+  "owner": {
+    "name": "Mike Henken",
+    "email": "mikehenken@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "resume-tailor",
+      "description": "Tailor resumes for multiple candidates with chat onboarding, state persistence, and PDF export (puppeteer or pdfkit fallback).",
+      "version": "1.2.1",
+      "source": "./plugins/resume-tailor",
+      "category": "productivity",
+      "homepage": "https://github.com/mikehenken/resume-tailor-agent-skill"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+---
+description: Tailors resumes for one or more candidates. Portable user data at ./.resume-tailor (or RESUME_TAILOR_USER_DIR). Multi-profile chat onboarding, ATS PDF via puppeteer or pdfkit fallback, browser-free PDF import. Use for resume tailoring — if invocation fails, inform the user; do NOT let the default agent continue.
+mode: subagent
+allowed-tools:
+  - bash
+  - read_file
+  - write_file
+  - glob
+  - grep
+---
+{AGENT_BODY}

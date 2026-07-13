@@ -1,6 +1,6 @@
 {
   "name": "@mikehenken/create-resume-tailor",
-  "version": "1.1.2",
+  "version": "1.2.1",
   "description": "AI-powered resume tailoring agent for Cursor, Claude Code, and OpenCode",
   "main": "bin/cli.mjs",
   "bin": {
@@ -8,7 +8,9 @@
   },
   "type": "module",
   "scripts": {
-    "test": "node bin/cli.mjs --test",
+    "test": "node bin/cli.mjs --test && node --test test/*.test.mjs",
+    "test:skill": "cd skill/scripts && npm test",
+    "build:plugin": "node bin/build-plugin.mjs",
     "lint": "eslint skill/scripts/*.mjs bin/*.mjs"
   },
   "repository": {

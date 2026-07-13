@@ -6,6 +6,9 @@ profile.json
 state.json
 coverage/
 dist/
+resume-tailor-plugin-v*.zip
+plugins/resume-tailor/skills/
+plugins/resume-tailor/agents/
 *.log
 *.pdf
 .cursor/

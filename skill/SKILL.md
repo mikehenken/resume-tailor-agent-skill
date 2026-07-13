@@ -7,6 +7,12 @@ description: Tailors resumes for specific roles or companies for one or more can
 
 **resume-tailor MUST always be used** for resume tailoring work. If invocation or delegation to resume-tailor fails, INFORM THE USER immediately. Do NOT have the default session agent continue the work in its place.
 
+## First use (chat-only — no setup commands)
+
+**Users never run initialization scripts.** On the first onboard, tailor, list-profiles, or profile write, the agent **silently** creates `{USER_ROOT}` if missing (`profiles/`, `tailors/`, `research/extension/`). Say things like *"Onboard me from this resume"* or *"Tailor for Platform Engineer at Acme"* — no terminal setup.
+
+Override storage with `RESUME_TAILOR_USER_DIR` (Cowork: point at your granted folder). Legacy `~/.claude/resume-tailor` is still auto-detected when present.
+
 ## Layout: bundled (system) vs user extension (open source)
 
 For **open source** and clear licensing, split **versioned system knowledge** from **private user add-ons**:
@@ -15,7 +21,7 @@ For **open source** and clear licensing, split **versioned system knowledge** fr
 |--------|------|---------|
 | **Skill root** | `{SKILL_ROOT}` — directory containing this `SKILL.md` | Shipped package: scripts, designs, **bundled research**. |
 | **Bundled research** | `{SKILL_ROOT}/research/bundled/*.md` | Maintainer-curated, generic ATS/domain/psychology/export references. Safe to publish. |
-| **User root** | `{USER_ROOT}` = `$RESUME_TAILOR_USER_DIR` if set, else `{PLATFORM_ROOT}/resume-tailor` | Private machine state: **profiles**, tailors, logs, **extension** markdown. **Do not** commit real profile/PII or employer intel to a public repo. |
+| **User root** | `{USER_ROOT}` = `$RESUME_TAILOR_USER_DIR` if set, else `./.resume-tailor` (workspace-relative). Legacy `~/.claude/resume-tailor` / `~/.cursor/resume-tailor` still auto-detected by `scripts/lib/user-paths.mjs`. | Private machine state: **profiles**, tailors, logs, **extension** markdown. **Do not** commit real profile/PII or employer intel to a public repo. |
 | **User extension research** | `{USER_ROOT}/research/extension/*.md` | Optional extra knowledge (company prep, niche domains). **Additive only** — use unique names (e.g. `user-bigco-prep-2026.md`); do not shadow bundled filenames. |
 
 **Canonical research paths:** `{SKILL_ROOT}/research/bundled/` (maintainer curated) and `{USER_ROOT}/research/extension/` (user add-ons). See `{SKILL_ROOT}/OPEN_SOURCE.md` for packaging and `.gitignore` hints.
@@ -49,7 +55,7 @@ Support **multiple candidates** on one machine. Profiles are independent baselin
 
 1. Ask for a display name / slug (or derive slug from `basics.name`).
 2. Accept **PDF / DOCX / TXT / MD / pasted text / JSON Resume**. Prefer: `node {SKILL_ROOT}/scripts/extract-from-resume.mjs <file>` then structure into JSON Resume with the user (proposal/approval for uncertain fields).
-3. Write `{USER_ROOT}/profiles/{profile_id}/profile.json`.
+3. Write `{USER_ROOT}/profiles/{profile_id}/profile.json` (agent creates `{USER_ROOT}` layout first if missing).
 4. Ensure portfolio (`basics.url` or Personal Website profile) and LinkedIn (`basics.profiles`) when the user has them — **never invent URLs**.
 5. If this is the first profile (or user asks), set `defaultProfileId` in `config.json`.
 6. Confirm with a short summary; then offer to start a tailor.
@@ -127,6 +133,8 @@ Resolution order: `--design` → `state.json` field `export_design` → env `RES
 Persist user preference: set `"export_design": "findmyprofession"` (or any canonical id) on `state.json` so repeats omit the flag.
 
 Non-ATS designs use color, serif/sans mixes, or multi-column skill presentation. **For strict ATS submissions, use `ats` only.**
+
+**Export engines** (no `~/.claude` required): **Puppeteer** when Chrome is available; **pdfkit** automatic fallback for `ats` (Cowork/cloud/sandbox); **HTML sidecar** if both fail (open in browser → Print to PDF). **PDF import** (`extract-from-resume.mjs`) uses **pdf-parse** only — no browser. User data layout is created automatically on first chat action (agent-internal; users never run setup scripts).
 
 ## PDF Export Naming
 
