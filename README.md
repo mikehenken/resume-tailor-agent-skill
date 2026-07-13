@@ -31,14 +31,32 @@ A free, open-source, local AI agent that crafts tailored resumes specific to job
 
 ## Installation
 
+### Interactive (recommended)
+
+Run this in a real terminal (PowerShell, Git Bash, macOS Terminal, etc.). You should see **four questions**:
+
+1. Platform (Cursor / Claude Code / OpenCode)
+2. Install location (global / project / custom)
+3. Resume seed (none / example / import file)
+4. Install PDF dependencies? (puppeteer)
+
 ```bash
-npx @mikehenken/create-resume-tailor
+npx @mikehenken/create-resume-tailor@latest
 ```
 
-Non-interactive Claude Code global install (example profile + PDF deps):
+`npx --yes` only skips *npx’s* own “install this package?” prompt. It does **not** skip the installer questions:
 
 ```bash
-npx @mikehenken/create-resume-tailor --platform claude --install-location global --resume example --yes
+# Still interactive:
+npx --yes @mikehenken/create-resume-tailor@latest
+```
+
+### Non-interactive (CI / scripted)
+
+Pass `--non-interactive` (or `--yes`) **after** the package name — that is what skips the questions:
+
+```bash
+npx @mikehenken/create-resume-tailor@latest --non-interactive --platform claude --install-location global --resume example
 ```
 
 From a local clone:
@@ -47,14 +65,8 @@ From a local clone:
 git clone https://github.com/mikehenken/resume-tailor-agent-skill.git
 cd resume-tailor-agent-skill
 npm install
-node bin/cli.mjs --platform claude --yes
+node bin/cli.mjs
 ```
-
-The installer will ask (unless `--yes`):
-1. **Platform**: Cursor, Claude Code, or OpenCode.
-2. **Location**: Global or Project-scoped (`--install-location`).
-3. **Resume**: none / example / import file.
-4. **Resume Export Tools**: Installs PDF dependencies.
 
 ### Multi-profile (chat)
 

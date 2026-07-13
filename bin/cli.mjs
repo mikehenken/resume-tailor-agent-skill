@@ -24,10 +24,60 @@ program
   .option('--profile-id <id>', 'Profile id when seeding a resume (default: derived or "default")')
   .option('--install-deps', 'Install PDF export dependencies (puppeteer)')
   .option('--no-install-deps', 'Skip PDF export dependency install')
-  .option('--yes', 'Non-interactive: accept defaults for unspecified options')
+  .option(
+    '--non-interactive',
+    'Skip questions; use flags and defaults (alias: --yes). Does NOT mean npx --yes.'
+  )
+  .option('--yes', 'Alias for --non-interactive')
   .parse(process.argv);
 
 const options = program.opts();
+const nonInteractive = Boolean(options.nonInteractive || options.yes);
+
+/**
+ * @returns {boolean}
+ */
+function canPromptInteractively() {
+  return Boolean(process.stdin.isTTY && process.stdout.isTTY);
+}
+
+/**
+ * Resolve a value from a CLI flag, non-interactive default, or interactive prompt.
+ * @template T
+ * @param {{
+ *   flagValue: T | undefined,
+ *   defaultValue: T,
+ *   flagName: string,
+ *   prompt: () => Promise<T>,
+ * }} args
+ * @returns {Promise<T>}
+ */
+async function resolveChoice(args) {
+  if (args.flagValue !== undefined && args.flagValue !== null && args.flagValue !== '') {
+    return args.flagValue;
+  }
+  if (nonInteractive) {
+    return args.defaultValue;
+  }
+  if (!canPromptInteractively()) {
+    console.error(`
+  Interactive prompts need a real terminal (TTY).
+
+  Re-run in your terminal (Git Bash / PowerShell / macOS Terminal), not a pipe:
+
+    npx @mikehenken/create-resume-tailor
+
+  Or pass flags for a non-interactive install:
+
+    npx @mikehenken/create-resume-tailor --non-interactive --platform claude --install-location global --resume example
+
+  Note: \`npx --yes\` only skips *npx's* "install this package?" prompt.
+  Installer questions are skipped only with \`--non-interactive\` / \`--yes\` *after* the package name.
+`);
+    process.exit(1);
+  }
+  return args.prompt();
+}
 
 /**
  * @param {string} src
@@ -104,49 +154,60 @@ function urlsFromProfile(profile) {
 
 async function run() {
   console.log('\n  🎯 Resume Tailor — AI-Powered Resume Tailoring Agent');
-  console.log('  ────────────────────────────────────────────────────\n');
+  console.log('  ────────────────────────────────────────────────────');
+  if (nonInteractive) {
+    console.log('  Mode: non-interactive (--non-interactive / --yes)\n');
+  } else if (canPromptInteractively()) {
+    console.log('  Mode: interactive — answer the questions below\n');
+  } else {
+    console.log('  Mode: interactive required (no TTY detected)\n');
+  }
 
   if (options.test) {
     console.log('Running in test/dry-run mode. Exiting with success.');
     process.exit(0);
   }
 
-  const platformChoice =
-    options.platform ||
-    (options.yes
-      ? 'claude'
-      : await select({
-          message: 'Which platform are you using?',
-          choices: [
-            { name: 'Cursor', value: 'cursor' },
-            { name: 'Claude Code', value: 'claude' },
-            { name: 'OpenCode', value: 'opencode' },
-          ],
-        }));
+  const platformChoice = await resolveChoice({
+    flagValue: options.platform,
+    defaultValue: 'claude',
+    flagName: '--platform',
+    prompt: () =>
+      select({
+        message: 'Which platform are you using?',
+        choices: [
+          { name: 'Cursor', value: 'cursor' },
+          { name: 'Claude Code', value: 'claude' },
+          { name: 'OpenCode', value: 'opencode' },
+        ],
+      }),
+  });
 
   if (!['cursor', 'claude', 'opencode'].includes(platformChoice)) {
     console.error(`Unsupported platform: ${platformChoice}`);
     process.exit(1);
   }
 
-  const installType =
-    options.installLocation ||
-    (options.yes
-      ? 'global'
-      : await select({
-          message: 'Where should the skill be installed?',
-          choices: [
-            {
-              name: `Global (~/.${platformChoice === 'opencode' ? 'config/opencode' : platformChoice}/skills/resume-tailor)`,
-              value: 'global',
-            },
-            {
-              name: `Project (.${platformChoice === 'opencode' ? 'opencode' : platformChoice}/skills/resume-tailor)`,
-              value: 'project',
-            },
-            { name: 'Custom path', value: 'custom' },
-          ],
-        }));
+  const installType = await resolveChoice({
+    flagValue: options.installLocation,
+    defaultValue: 'global',
+    flagName: '--install-location',
+    prompt: () =>
+      select({
+        message: 'Where should the skill be installed?',
+        choices: [
+          {
+            name: `Global (~/.${platformChoice === 'opencode' ? 'config/opencode' : platformChoice}/skills/resume-tailor)`,
+            value: 'global',
+          },
+          {
+            name: `Project (.${platformChoice === 'opencode' ? 'opencode' : platformChoice}/skills/resume-tailor)`,
+            value: 'project',
+          },
+          { name: 'Custom path', value: 'custom' },
+        ],
+      }),
+  });
 
   let targetDir = '';
   const homedir = os.homedir();
@@ -170,9 +231,16 @@ async function run() {
     platformRootFs = platformPaths[platformChoice].project;
     targetDir = path.join(platformRootFs, 'skills', 'resume-tailor');
   } else if (installType === 'custom') {
-    targetDir =
-      options.customPath ||
-      (await input({ message: 'Enter custom path to install the skill folder:' }));
+    targetDir = await resolveChoice({
+      flagValue: options.customPath,
+      defaultValue: '',
+      flagName: '--custom-path',
+      prompt: () => input({ message: 'Enter custom path to install the skill folder:' }),
+    });
+    if (!targetDir) {
+      console.error('Custom install requires --custom-path in non-interactive mode.');
+      process.exit(1);
+    }
     platformRootFs = path.dirname(path.dirname(targetDir));
   } else {
     console.error(`Unsupported location: ${installType}`);
@@ -186,22 +254,33 @@ async function run() {
 
   const userRootFs = path.join(platformRootFs, 'resume-tailor');
 
-  const resumeSource =
-    options.resume ||
-    (options.yes
-      ? 'example'
-      : await select({
-          message: 'Do you have an existing resume to import?',
-          choices: [
-            { name: "No (I'll onboard via chat later)", value: 'none' },
-            { name: 'Use example profile (Alex Applicant)', value: 'example' },
-            { name: 'Import file path (PDF/DOCX/TXT/MD/JSON)', value: 'file' },
-          ],
-        }));
+  const resumeSource = await resolveChoice({
+    flagValue: options.resume,
+    defaultValue: 'example',
+    flagName: '--resume',
+    prompt: () =>
+      select({
+        message: 'Do you have an existing resume to import?',
+        choices: [
+          { name: "No (I'll onboard via chat later)", value: 'none' },
+          { name: 'Use example profile (Alex Applicant)', value: 'example' },
+          { name: 'Import file path (PDF/DOCX/TXT/MD/JSON)', value: 'file' },
+        ],
+      }),
+  });
 
   let resumeFilePath = '';
   if (resumeSource === 'file' && !options.resume) {
-    resumeFilePath = await input({ message: 'Path to resume file:' });
+    resumeFilePath = await resolveChoice({
+      flagValue: undefined,
+      defaultValue: '',
+      flagName: '--resume <file>',
+      prompt: () => input({ message: 'Path to resume file:' }),
+    });
+    if (!resumeFilePath) {
+      console.error('File import requires a path (interactive answer or --resume <path>).');
+      process.exit(1);
+    }
   } else if (
     resumeSource !== 'none' &&
     resumeSource !== 'example' &&
@@ -211,17 +290,30 @@ async function run() {
     resumeFilePath = resumeSource;
   }
 
-  const installDeps =
-    options.installDeps === true
-      ? true
-      : options.installDeps === false
-        ? false
-        : options.yes
-          ? true
-          : await confirm({
-              message: 'Install PDF export dependencies? (puppeteer ~300MB)',
-              default: true,
-            });
+  /** @type {boolean | undefined} */
+  let installDepsFlag = undefined;
+  if (options.installDeps === true) installDepsFlag = true;
+  if (options.installDeps === false) installDepsFlag = false;
+
+  const installDeps = await resolveChoice({
+    flagValue: installDepsFlag,
+    defaultValue: true,
+    flagName: '--install-deps / --no-install-deps',
+    prompt: () =>
+      confirm({
+        message: 'Install PDF export dependencies? (puppeteer ~300MB)',
+        default: true,
+      }),
+  });
+
+  if (nonInteractive) {
+    console.log('  Using:');
+    console.log(`    platform:         ${platformChoice}`);
+    console.log(`    install-location: ${installType}`);
+    console.log(`    resume:           ${resumeSource}${resumeFilePath ? ` (${resumeFilePath})` : ''}`);
+    console.log(`    install-deps:     ${installDeps}`);
+    console.log('');
+  }
 
   console.log(`\nCreating directories...`);
   fs.mkdirSync(targetDir, { recursive: true });
