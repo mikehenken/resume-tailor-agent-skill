@@ -31,6 +31,21 @@ If you have new data regarding ATS systems, hiring psychology, or specific job d
 
 Please ensure all tests pass before opening a Pull Request.
 
+## Releases
+
+Tagged releases (`v*`) run `.github/workflows/release.yml`, which:
+
+1. Publishes `@mikehenken/create-resume-tailor` to the **public npmjs** registry
+2. Builds per-platform tarballs and creates a GitHub Release
+
+**Required repo secret:** `NPM_TOKEN` — an npm [Automation](https://docs.npmjs.com/about-access-tokens) access token for an account that can publish the `@mikehenken` scope (or the unscoped package name if you rename later).
+
+```bash
+# After merging to main and bumping package.json version:
+git tag v1.0.1
+git push origin v1.0.1
+```
+
 ## Code of Conduct
 
 Please treat all contributors with respect.

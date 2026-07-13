@@ -31,10 +31,19 @@ A free, open-source, local AI agent that crafts tailored resumes specific to job
 
 ## Installation
 
-Run the interactive installer via NPX to copy the skill and inject platform-specific configurations:
+Run the interactive installer via NPX to copy the skill and inject platform-specific configurations (published on [npmjs](https://www.npmjs.com/package/@mikehenken/create-resume-tailor)):
 
 ```bash
 npx @mikehenken/create-resume-tailor
+```
+
+From a local clone (no npm publish required):
+
+```bash
+git clone https://github.com/mikehenken/resume-tailor-agent-skill.git
+cd resume-tailor-agent-skill
+npm install
+node bin/cli.mjs
 ```
 
 The installer will ask:

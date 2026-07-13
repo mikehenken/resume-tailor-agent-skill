@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   publish:
@@ -17,15 +16,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: 'https://registry.npmjs.org'
+          # Scoped packages need scope + registry so npm publish authenticates correctly
+          scope: '@mikehenken'
       - name: Install dependencies
         run: npm ci
       - name: Run tests
         run: cd skill/scripts && npm ci && npm test
-      - name: Publish to GitHub Packages
-        run: npm publish
+      - name: Publish to npmjs
+        run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release-artifacts:
     runs-on: ubuntu-latest
