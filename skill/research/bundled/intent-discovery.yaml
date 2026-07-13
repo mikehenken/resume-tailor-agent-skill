@@ -7,9 +7,9 @@ plan_ref: c:\Users\mikeh\.cursor\plans\resume_tailor_agent_bae446a8.plan.md
 
 # Q1-Q8: Basic Configuration
 primary_purpose: |
-  Tailors Mike Henken's resume for specific roles or companies. Changes summary at top,
+  Tailors resumes for one or more candidates for specific roles or companies. Changes summary at top,
   experience order, bullet emphasis, skills selection. Produces change reports, persists
-  state, exports ATS-friendly PDFs. Supports company/role research and job application
+  state, exports ATS-friendly PDFs. Supports multi-profile onboarding, company/role research and job application
   state tracking (applied, replies, interviews, offers).
 
 category: development # Primary; capabilities include research, documentation
@@ -19,10 +19,10 @@ claude_compliant: 1
 agent_name: resume-tailor
 
 description: |
-  Create in-depth tailored resumes for Mike Henken—self-contained in ~/.cursor
-  (no vector embeddings, no external DB). Reads profile from skill, supports role-only
+  Create in-depth tailored resumes for multiple candidates—self-contained under
+  {PLATFORM_ROOT}/resume-tailor. Reads profile by profile_id, supports role-only
   or company+role, interactive Q&A, change reports, state persistence, job application
-  tracking, and ATS-friendly PDF export. Always includes https://mikehenken.pages.dev.
+  tracking, and ATS-friendly PDF export. Include portfolio/LinkedIn from the bound profile.
   Use when tailoring resume for a job or role.
 
 use_cases:
@@ -88,5 +88,5 @@ mandatory_rules:
     resume-tailor MUST always be used for resume tailoring work. If invocation/delegation
     to resume-tailor fails, INFORM THE USER—do NOT have the default session agent
     continue the work in its place.
-  - Always include https://mikehenken.pages.dev in resume output.
+  - Always include portfolio/LinkedIn from the bound candidate profile when present (never invent URLs).
   - Do not shorten bullets unless strong role-specific reason.

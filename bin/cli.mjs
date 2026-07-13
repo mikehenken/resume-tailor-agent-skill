@@ -14,10 +14,93 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 
 program
   .option('--test', 'Run in test/dry-run mode')
-  .option('--platform <type>', 'Specify platform for automated runs')
+  .option('--platform <type>', 'Platform: cursor | claude | opencode')
+  .option('--location <type>', 'Install location: global | project | custom')
+  .option('--custom-path <path>', 'Custom skill install directory (with --location custom)')
+  .option(
+    '--resume <source>',
+    'Profile seed: none | example | path to PDF/DOCX/TXT/MD/JSON'
+  )
+  .option('--profile-id <id>', 'Profile id when seeding a resume (default: derived or "default")')
+  .option('--install-deps', 'Install PDF export dependencies (puppeteer)')
+  .option('--no-install-deps', 'Skip PDF export dependency install')
+  .option('--yes', 'Non-interactive: accept defaults for unspecified options')
   .parse(process.argv);
 
 const options = program.opts();
+
+/**
+ * @param {string} src
+ * @param {string} dest
+ */
+function copyRecursiveSync(src, dest) {
+  const exists = fs.existsSync(src);
+  const stats = exists && fs.statSync(src);
+  const isDirectory = exists && stats.isDirectory();
+  if (isDirectory) {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    fs.readdirSync(src).forEach((childItemName) => {
+      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+    });
+  } else {
+    fs.copyFileSync(src, dest);
+  }
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function slugifyProfileId(value) {
+  return (
+    String(value || '')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 64) || 'default'
+  );
+}
+
+/**
+ * @param {unknown} profile
+ * @returns {{ portfolio: string, linkedin: string }}
+ */
+function urlsFromProfile(profile) {
+  const basics =
+    profile && typeof profile === 'object' && profile !== null && 'basics' in profile
+      ? /** @type {{ basics?: Record<string, unknown> }} */ (profile).basics
+      : undefined;
+  const portfolio =
+    basics && typeof basics.url === 'string' && basics.url.trim() !== ''
+      ? basics.url.trim()
+      : 'https://your-portfolio.example';
+  const profiles = basics && Array.isArray(basics.profiles) ? basics.profiles : [];
+  /** @type {string} */
+  let linkedin = 'https://linkedin.com/in/your-profile';
+  for (const p of profiles) {
+    if (
+      p &&
+      typeof p === 'object' &&
+      typeof /** @type {{ url?: string }} */ (p).url === 'string' &&
+      /linkedin/i.test(String(/** @type {{ network?: string }} */ (p).network || ''))
+    ) {
+      linkedin = /** @type {{ url: string }} */ (p).url;
+      break;
+    }
+    if (
+      p &&
+      typeof p === 'object' &&
+      typeof /** @type {{ url?: string }} */ (p).url === 'string' &&
+      /linkedin\.com/i.test(/** @type {{ url: string }} */ (p).url)
+    ) {
+      linkedin = /** @type {{ url: string }} */ (p).url;
+      break;
+    }
+  }
+  return { portfolio, linkedin };
+}
 
 async function run() {
   console.log('\n  🎯 Resume Tailor — AI-Powered Resume Tailoring Agent');
@@ -28,23 +111,42 @@ async function run() {
     process.exit(0);
   }
 
-  const platformChoice = options.platform || await select({
-    message: 'Which platform are you using?',
-    choices: [
-      { name: 'Cursor', value: 'cursor' },
-      { name: 'Claude Code', value: 'claude' },
-      { name: 'OpenCode', value: 'opencode' }
-    ]
-  });
+  const platformChoice =
+    options.platform ||
+    (options.yes
+      ? 'claude'
+      : await select({
+          message: 'Which platform are you using?',
+          choices: [
+            { name: 'Cursor', value: 'cursor' },
+            { name: 'Claude Code', value: 'claude' },
+            { name: 'OpenCode', value: 'opencode' },
+          ],
+        }));
 
-  const installType = await select({
-    message: 'Where should the skill be installed?',
-    choices: [
-      { name: `Global (~/.${platformChoice === 'opencode' ? 'config/opencode' : platformChoice}/skills/resume-tailor)`, value: 'global' },
-      { name: `Project (.${platformChoice === 'opencode' ? 'opencode' : platformChoice}/skills/resume-tailor)`, value: 'project' },
-      { name: 'Custom path', value: 'custom' }
-    ]
-  });
+  if (!['cursor', 'claude', 'opencode'].includes(platformChoice)) {
+    console.error(`Unsupported platform: ${platformChoice}`);
+    process.exit(1);
+  }
+
+  const installType =
+    options.location ||
+    (options.yes
+      ? 'global'
+      : await select({
+          message: 'Where should the skill be installed?',
+          choices: [
+            {
+              name: `Global (~/.${platformChoice === 'opencode' ? 'config/opencode' : platformChoice}/skills/resume-tailor)`,
+              value: 'global',
+            },
+            {
+              name: `Project (.${platformChoice === 'opencode' ? 'opencode' : platformChoice}/skills/resume-tailor)`,
+              value: 'project',
+            },
+            { name: 'Custom path', value: 'custom' },
+          ],
+        }));
 
   let targetDir = '';
   const homedir = os.homedir();
@@ -53,113 +155,231 @@ async function run() {
   const platformPaths = {
     cursor: { global: path.join(homedir, '.cursor'), project: path.join(cwd, '.cursor') },
     claude: { global: path.join(homedir, '.claude'), project: path.join(cwd, '.claude') },
-    opencode: { global: path.join(homedir, '.config', 'opencode'), project: path.join(cwd, '.opencode') }
+    opencode: {
+      global: path.join(homedir, '.config', 'opencode'),
+      project: path.join(cwd, '.opencode'),
+    },
   };
 
+  /** @type {string} */
+  let platformRootFs;
   if (installType === 'global') {
-    targetDir = path.join(platformPaths[platformChoice].global, 'skills', 'resume-tailor');
+    platformRootFs = platformPaths[platformChoice].global;
+    targetDir = path.join(platformRootFs, 'skills', 'resume-tailor');
   } else if (installType === 'project') {
-    targetDir = path.join(platformPaths[platformChoice].project, 'skills', 'resume-tailor');
+    platformRootFs = platformPaths[platformChoice].project;
+    targetDir = path.join(platformRootFs, 'skills', 'resume-tailor');
+  } else if (installType === 'custom') {
+    targetDir =
+      options.customPath ||
+      (await input({ message: 'Enter custom path to install the skill folder:' }));
+    platformRootFs = path.dirname(path.dirname(targetDir));
   } else {
-    targetDir = await input({ message: 'Enter custom path to install the folder:' });
+    console.error(`Unsupported location: ${installType}`);
+    process.exit(1);
   }
 
-  const agentTargetDir = installType === 'global' ? path.join(platformPaths[platformChoice].global, 'agents') : (installType === 'project' ? path.join(platformPaths[platformChoice].project, 'agents') : path.join(path.dirname(targetDir), 'agents'));
+  const agentTargetDir =
+    installType === 'custom'
+      ? path.join(path.dirname(targetDir), 'agents')
+      : path.join(platformRootFs, 'agents');
 
-  const resumeSource = await select({
-    message: 'Do you have an existing resume to import?',
-    choices: [
-      { name: 'No (I\'ll set up profile.json manually)', value: 'no' },
-      { name: 'Use example profile', value: 'example' }
-      // Skipping actual file import for MVP to avoid unneeded complexity unless user explicitly provides one
-      // { name: 'Yes (TXT/JSON/MD)', value: 'yes' }
-    ]
-  });
+  const userRootFs = path.join(platformRootFs, 'resume-tailor');
 
-  const installDeps = await confirm({
-    message: 'Install PDF export dependencies? (puppeteer ~300MB)',
-    default: true
-  });
+  const resumeSource =
+    options.resume ||
+    (options.yes
+      ? 'example'
+      : await select({
+          message: 'Do you have an existing resume to import?',
+          choices: [
+            { name: "No (I'll onboard via chat later)", value: 'none' },
+            { name: 'Use example profile (Alex Applicant)', value: 'example' },
+            { name: 'Import file path (PDF/DOCX/TXT/MD/JSON)', value: 'file' },
+          ],
+        }));
 
-  // Execute copying
+  let resumeFilePath = '';
+  if (resumeSource === 'file' && !options.resume) {
+    resumeFilePath = await input({ message: 'Path to resume file:' });
+  } else if (
+    resumeSource !== 'none' &&
+    resumeSource !== 'example' &&
+    resumeSource !== 'no' &&
+    resumeSource !== 'file'
+  ) {
+    resumeFilePath = resumeSource;
+  }
+
+  const installDeps =
+    options.installDeps === true
+      ? true
+      : options.installDeps === false
+        ? false
+        : options.yes
+          ? true
+          : await confirm({
+              message: 'Install PDF export dependencies? (puppeteer ~300MB)',
+              default: true,
+            });
+
   console.log(`\nCreating directories...`);
   fs.mkdirSync(targetDir, { recursive: true });
   fs.mkdirSync(agentTargetDir, { recursive: true });
+  fs.mkdirSync(path.join(userRootFs, 'profiles'), { recursive: true });
+  fs.mkdirSync(path.join(userRootFs, 'tailors'), { recursive: true });
+  fs.mkdirSync(path.join(userRootFs, 'research', 'extension'), { recursive: true });
 
   const skillSourceDir = path.join(REPO_ROOT, 'skill');
-  
-  // Recursively copy skill directory
-  function copyRecursiveSync(src, dest) {
-    const exists = fs.existsSync(src);
-    const stats = exists && fs.statSync(src);
-    const isDirectory = exists && stats.isDirectory();
-    if (isDirectory) {
-      if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-      fs.readdirSync(src).forEach(childItemName => {
-        copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
-      });
-    } else {
-      fs.copyFileSync(src, dest);
-    }
-  };
 
   console.log('Copying Canonical skill...');
   copyRecursiveSync(skillSourceDir, targetDir);
 
-  // Read templates
   const agentBody = fs.readFileSync(path.join(REPO_ROOT, 'adapters', 'agent-body.tmpl'), 'utf-8');
-  const agentTmpl = fs.readFileSync(path.join(REPO_ROOT, 'adapters', platformChoice, 'agent.md.tmpl'), 'utf-8');
-  const frontmatterYaml = fs.readFileSync(path.join(REPO_ROOT, 'adapters', platformChoice, 'skill-frontmatter.yaml'), 'utf-8');
-  
-  const platformRootConfig = (installType === 'global') ? `~/.${platformChoice === 'opencode' ? 'config/opencode' : platformChoice}` : `.${platformChoice === 'opencode' ? 'opencode' : platformChoice}`;
-  const skillRootConfig = targetDir;
-  
+  const agentTmpl = fs.readFileSync(
+    path.join(REPO_ROOT, 'adapters', platformChoice, 'agent.md.tmpl'),
+    'utf-8'
+  );
+  const frontmatterYaml = fs.readFileSync(
+    path.join(REPO_ROOT, 'adapters', platformChoice, 'skill-frontmatter.yaml'),
+    'utf-8'
+  );
+
+  const platformRootConfig =
+    installType === 'global'
+      ? `~/.${platformChoice === 'opencode' ? 'config/opencode' : platformChoice}`
+      : installType === 'project'
+        ? `.${platformChoice === 'opencode' ? 'opencode' : platformChoice}`
+        : platformRootFs.replace(/\\/g, '/');
+
+  const userRootConfig = `${platformRootConfig}/resume-tailor`;
+  const skillRootConfig = targetDir.replace(/\\/g, '/');
+
+  /** @type {unknown} */
+  let seededProfile = null;
+  /** @type {string | null} */
+  let seededProfileId = null;
+
+  const normalizedResume =
+    resumeSource === 'no' || resumeSource === 'none'
+      ? 'none'
+      : resumeFilePath
+        ? 'file'
+        : resumeSource === 'example'
+          ? 'example'
+          : resumeSource === 'file'
+            ? 'file'
+            : 'none';
+
+  if (normalizedResume === 'example') {
+    const examplePath = path.join(REPO_ROOT, 'examples', 'profile.example.json');
+    seededProfile = JSON.parse(fs.readFileSync(examplePath, 'utf-8'));
+    seededProfileId = options.profileId
+      ? slugifyProfileId(options.profileId)
+      : 'alex-applicant';
+  } else if (normalizedResume === 'file') {
+    if (!resumeFilePath || !fs.existsSync(resumeFilePath)) {
+      console.error(`Resume file not found: ${resumeFilePath || '(empty)'}`);
+      process.exit(1);
+    }
+    const ext = path.extname(resumeFilePath).toLowerCase();
+    if (ext === '.json') {
+      seededProfile = JSON.parse(fs.readFileSync(resumeFilePath, 'utf-8'));
+    } else {
+      const extractScript = path.join(targetDir, 'scripts', 'extract-from-resume.mjs');
+      const outPath = path.join(os.tmpdir(), `resume-tailor-extract-${Date.now()}.json`);
+      try {
+        execSync(`node "${extractScript}" "${resumeFilePath}" -o "${outPath}"`, {
+          stdio: 'inherit',
+        });
+        seededProfile = JSON.parse(fs.readFileSync(outPath, 'utf-8'));
+      } catch (e) {
+        console.warn(
+          'Extract failed. You can onboard via chat later. Error:',
+          e instanceof Error ? e.message : e
+        );
+        seededProfile = null;
+      }
+    }
+    const nameFromProfile =
+      seededProfile &&
+      typeof seededProfile === 'object' &&
+      seededProfile !== null &&
+      'basics' in seededProfile &&
+      /** @type {{ basics?: { name?: string } }} */ (seededProfile).basics?.name
+        ? /** @type {{ basics: { name: string } }} */ (seededProfile).basics.name
+        : path.basename(resumeFilePath, path.extname(resumeFilePath));
+    seededProfileId = slugifyProfileId(options.profileId || nameFromProfile || 'candidate');
+  }
+
+  const { portfolio, linkedin } = urlsFromProfile(seededProfile);
+
   let finalAgent = agentTmpl.replace('{AGENT_BODY}', agentBody);
   let finalSkillMd = fs.readFileSync(path.join(targetDir, 'SKILL.md'), 'utf-8');
 
-  // String Replacements
   finalAgent = finalAgent.replace(/\{PLATFORM_ROOT\}/g, platformRootConfig);
-  finalAgent = finalAgent.replace(/\{USER_ROOT\}/g, platformRootConfig);
+  finalAgent = finalAgent.replace(/\{USER_ROOT\}/g, userRootConfig);
   finalAgent = finalAgent.replace(/\{SKILL_ROOT\}/g, skillRootConfig);
-  finalAgent = finalAgent.replace(/\{PORTFOLIO_URL\}/g, 'https://mikehenken.pages.dev'); // can be asked or extracted
-  finalAgent = finalAgent.replace(/\{LINKEDIN_URL\}/g, 'https://linkedin.com/in/mike-henken-72bb4428');
-  
+  finalAgent = finalAgent.replace(/\{PORTFOLIO_URL\}/g, portfolio);
+  finalAgent = finalAgent.replace(/\{LINKEDIN_URL\}/g, linkedin);
+
   if (platformChoice === 'cursor') {
-    finalAgent = finalAgent.replace(/\{PLATFORM_TOOLS\}/g, 'Read, Write, StrReplace, Glob, Grep, WebSearch, Shell, Task, mcp_web_fetch');
+    finalAgent = finalAgent.replace(
+      /\{PLATFORM_TOOLS\}/g,
+      'Read, Write, StrReplace, Glob, Grep, WebSearch, Shell, Task, mcp_web_fetch'
+    );
   }
 
   finalSkillMd = `---\n${frontmatterYaml}---\n\n` + finalSkillMd;
   finalSkillMd = finalSkillMd.replace(/\{PLATFORM_ROOT\}/g, platformRootConfig);
+  finalSkillMd = finalSkillMd.replace(/\{USER_ROOT\}/g, userRootConfig);
+  finalSkillMd = finalSkillMd.replace(/\{SKILL_ROOT\}/g, skillRootConfig);
 
   fs.writeFileSync(path.join(targetDir, 'SKILL.md'), finalSkillMd);
   fs.writeFileSync(path.join(agentTargetDir, 'resume-tailor.md'), finalAgent);
 
-  if (resumeSource === 'example') {
-    fs.copyFileSync(path.join(REPO_ROOT, 'examples', 'profile.example.json'), path.join(targetDir, 'profile.json'));
+  if (seededProfile && seededProfileId) {
+    const profileDir = path.join(userRootFs, 'profiles', seededProfileId);
+    fs.mkdirSync(profileDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(profileDir, 'profile.json'),
+      JSON.stringify(seededProfile, null, 2) + '\n',
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(userRootFs, 'config.json'),
+      JSON.stringify({ defaultProfileId: seededProfileId }, null, 2) + '\n',
+      'utf-8'
+    );
   }
 
   if (installDeps) {
     console.log('Installing scripts dependencies...');
     try {
       execSync('npm install', { cwd: path.join(targetDir, 'scripts'), stdio: 'inherit' });
-    } catch (e) {
-      console.warn('Failed to install dependencies cleanly. You can run `npm install` inside the scripts folder manually.');
+    } catch {
+      console.warn(
+        'Failed to install dependencies cleanly. You can run `npm install` inside the scripts folder manually.'
+      );
     }
   }
 
   console.log(`\n  ✓ Skill installed to ${targetDir}`);
   console.log(`  ✓ Agent installed to ${path.join(agentTargetDir, 'resume-tailor.md')}`);
-  if (resumeSource === 'example') {
-    console.log(`  ✓ Example profile copied to ${path.join(targetDir, 'profile.json')}`);
+  console.log(`  ✓ User data root ${userRootFs}`);
+  if (seededProfile && seededProfileId) {
+    console.log(
+      `  ✓ Profile seeded at ${path.join(userRootFs, 'profiles', seededProfileId, 'profile.json')}`
+    );
   }
-  
+
   console.log('\n  Next steps:');
   console.log(`    1. Open ${platformChoice}`);
-  console.log(`    2. Say: "Tailor my resume for Platform Engineer at Acme Corp"`);
-  console.log(`    3. The agent will read your profile and guide you through tailoring\n`);
+  console.log(`    2. Say: "List profiles" or "Onboard a new candidate from this resume"`);
+  console.log(`    3. Say: "Tailor my resume for Platform Engineer at Acme Corp"\n`);
 }
 
-run().catch(err => {
+run().catch((err) => {
   console.error(err);
   process.exit(1);
 });

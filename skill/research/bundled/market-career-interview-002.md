@@ -414,12 +414,12 @@ The resume tailor agent should:
 
 ### Naming Conventions
 
-**File naming**: `Henken_Resume_{RoleSlug}_{CompanySlug}_{Date}.pdf`
+**File naming**: `{LastName}_Resume_{RoleSlug}_{CompanySlug}_{Date}.pdf`
 
 Examples:
-- `Henken_Resume_DevOps-Director_Stripe_2026-03-17.pdf`
-- `Henken_Resume_Sr-TPM_Amazon_2026-03-17.pdf`
-- `Henken_Resume_VP-Eng_General_2026-Q1.pdf` (base, no company)
+- `Lee_Resume_DevOps-Director_Stripe_2026-03-17.pdf`
+- `Applicant_Resume_Sr-TPM_Amazon_2026-03-17.pdf`
+- `Lee_Resume_VP-Eng_2026-Q1.pdf` (role-only, no company)
 
 **Rules**:
 - Use hyphens within slugs, underscores between fields

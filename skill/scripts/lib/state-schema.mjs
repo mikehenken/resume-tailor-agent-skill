@@ -147,6 +147,13 @@ export function validateTailorStateStructure(stateData) {
     errors.push('export_design must be a non-empty string when provided.');
   }
 
+  if (
+    stateData.profile_id !== undefined &&
+    !isNonEmptyString(stateData.profile_id)
+  ) {
+    errors.push('profile_id must be a non-empty string when provided.');
+  }
+
   return { valid: errors.length === 0, errors };
 }
 

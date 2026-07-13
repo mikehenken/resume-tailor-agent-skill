@@ -42,7 +42,7 @@ node export-pdf.mjs <input-json-path> <output.pdf> [--design=amin-ariana]
 
 **Design resolution**: `--design` → `export_design` on parsed JSON → env `RESUME_TAILOR_DESIGN` → `ats`.
 
-**Filename** (auto): `Henken_Resume_{RoleSlug}_{CompanySlug}_{Date}.pdf`, or with `_{designId}` before `.pdf` when design ≠ `ats`.
+**Filename** (auto): `{LastName}_Resume_{RoleSlug}_{CompanySlug}_{Date}.pdf`, or with `_{designId}` before `.pdf` when design ≠ `ats`. Last name comes from `basics.name` (or `profile_id`).
 
 **Requirements**: Puppeteer (`npm install`).
 

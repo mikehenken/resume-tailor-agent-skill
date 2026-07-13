@@ -137,12 +137,29 @@ test('parseExportArgv captures --design <value> form', () => {
 test('defaultPdfFilename appends design suffix when not ats', () => {
   const name = defaultPdfFilename(
     {
-      basics: { label: 'Director' },
+      basics: { name: 'Alex Applicant', label: 'Director' },
       created_at: '2025-01-10',
     },
     'alex-gervais'
   );
+  assert.ok(name.startsWith('Applicant_Resume_'), name);
   assert.ok(name.endsWith('_alex-gervais.pdf'), name);
+});
+
+test('defaultPdfFilename uses last name from tailored_content', () => {
+  const name = defaultPdfFilename(
+    {
+      tailored_content: {
+        basics: { name: 'Jordan Lee', label: 'Platform Engineer' },
+        work: [],
+        skills: [],
+      },
+      target: { role: 'Platform Engineer', company: 'Acme' },
+      created_at: '2026-07-13',
+    },
+    'ats'
+  );
+  assert.equal(name, 'Lee_Resume_Platform-Engineer_Acme_2026-07-13.pdf');
 });
 
 test('buildHtmlDocument includes resume shell and escaped literals', () => {

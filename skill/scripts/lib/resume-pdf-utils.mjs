@@ -95,6 +95,30 @@ export function slugify(text) {
 }
 
 /**
+ * Last-name (or single-name) slug from JSON Resume basics.name for PDF prefixes.
+ *
+ * @param {Record<string, unknown>} data
+ * @returns {string}
+ */
+export function candidateNameSlug(data) {
+  const basics =
+    (data.tailored_content && typeof data.tailored_content === 'object'
+      ? data.tailored_content.basics
+      : null) ||
+    data.basics ||
+    {};
+  const rawName =
+    typeof basics.name === 'string' && basics.name.trim() !== ''
+      ? basics.name.trim()
+      : typeof data.profile_id === 'string' && data.profile_id.trim() !== ''
+        ? data.profile_id.trim()
+        : 'Resume';
+  const parts = rawName.split(/\s+/).filter(Boolean);
+  const last = parts.length > 0 ? parts[parts.length - 1] : 'Resume';
+  return slugify(last) || 'Resume';
+}
+
+/**
  * @param {Record<string, unknown>} data
  * @param {string} designId
  */
@@ -108,6 +132,7 @@ export function defaultPdfFilename(data, designId) {
   const createdRaw = data.created_at || data.updated_at || new Date().toISOString();
   const date = isoDatePrefix(createdRaw);
 
+  const personSlug = candidateNameSlug(data);
   const roleSlug =
     slugify(role.split(/[,(]|[-|]/)[0]?.trim() || role) || 'Resume';
   const companySlug = slugify(company) || 'General';
@@ -115,9 +140,9 @@ export function defaultPdfFilename(data, designId) {
   const designSuffix = designId && designId !== 'ats' ? '_' + designId : '';
 
   if (companySlug && companySlug !== 'General') {
-    return `Henken_Resume_${roleSlug}_${companySlug}_${date}${designSuffix}.pdf`;
+    return `${personSlug}_Resume_${roleSlug}_${companySlug}_${date}${designSuffix}.pdf`;
   }
-  return `Henken_Resume_${roleSlug}_${date}${designSuffix}.pdf`;
+  return `${personSlug}_Resume_${roleSlug}_${date}${designSuffix}.pdf`;
 }
 
 /**

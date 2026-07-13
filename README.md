@@ -31,25 +31,41 @@ A free, open-source, local AI agent that crafts tailored resumes specific to job
 
 ## Installation
 
-Run the interactive installer via NPX to copy the skill and inject platform-specific configurations (published on [npmjs](https://www.npmjs.com/package/@mikehenken/create-resume-tailor)):
-
 ```bash
 npx @mikehenken/create-resume-tailor
 ```
 
-From a local clone (no npm publish required):
+Non-interactive Claude Code global install (example profile + PDF deps):
+
+```bash
+npx @mikehenken/create-resume-tailor --platform claude --location global --resume example --yes
+```
+
+From a local clone:
 
 ```bash
 git clone https://github.com/mikehenken/resume-tailor-agent-skill.git
 cd resume-tailor-agent-skill
 npm install
-node bin/cli.mjs
+node bin/cli.mjs --platform claude --yes
 ```
 
-The installer will ask:
+The installer will ask (unless `--yes`):
 1. **Platform**: Cursor, Claude Code, or OpenCode.
 2. **Location**: Global or Project-scoped.
-3. **Resume Export Tools**: Installs PDF dependencies.
+3. **Resume**: none / example / import file.
+4. **Resume Export Tools**: Installs PDF dependencies.
+
+### Multi-profile (chat)
+
+After install, in Claude/Cursor:
+
+- `List profiles`
+- `Onboard a new candidate from this resume` (attach PDF/DOCX or paste)
+- `Set default profile to jordan-lee`
+- `Tailor jordan-lee for Platform Engineer at Acme`
+
+Each tailor stores `profile_id` so concurrent sessions for different candidates stay isolated.
 
 ## Usage
 

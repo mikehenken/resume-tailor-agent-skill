@@ -1,5 +1,5 @@
 name: resume-tailor
-description: Tailors resumes for specific roles or companies.
+description: Tailors resumes for one or more candidates — multi-profile, chat onboarding, job-specific PDF export.
 allowed-tools:
   - bash
   - read_file
