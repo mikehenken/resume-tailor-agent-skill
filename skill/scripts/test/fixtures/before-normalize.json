@@ -12,6 +12,36 @@
       "url": ""
     }
   ],
+  "projects": [
+    {
+      "name": "Open Source Tool",
+      "startDate": "2023-01",
+      "endDate": null,
+      "url": ""
+    },
+    {
+      "name": "Shipped Library",
+      "startDate": "2021-06",
+      "endDate": "2022-12",
+      "url": "https://example.com/shipped"
+    }
+  ],
+  "education": [
+    {
+      "institution": "State University",
+      "area": "Computer Science",
+      "studyType": "Bachelor",
+      "startDate": "2016-09",
+      "endDate": null
+    },
+    {
+      "institution": "City College",
+      "area": "Mathematics",
+      "studyType": "Associate",
+      "startDate": "2014-09",
+      "endDate": "2016-05"
+    }
+  ],
   "customRecommendations": [
     {
       "recommender": "Jane Q.",
