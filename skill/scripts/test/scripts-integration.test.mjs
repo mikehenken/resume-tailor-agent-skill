@@ -93,6 +93,25 @@ test('normalize-json-resume: migrates customRecommendations and fixes work field
   }
 });
 
+test('normalize-json-resume: fixes projects and education fields', () => {
+  const dir = join(tmpdir(), 'resume-tailor-test-proj-' + Date.now());
+  mkdirSync(dir, { recursive: true });
+  const dest = join(dir, 'normalize-proj.json');
+  try {
+    copyFileSync(join(__dirname, 'fixtures', 'before-normalize.json'), dest);
+    const r = runScript('normalize-json-resume.mjs', [dest]);
+    assert.equal(r.status, 0, r.stderr);
+    const out = JSON.parse(readFileSync(dest, 'utf-8'));
+    assert.equal(out.projects[0].endDate, undefined);
+    assert.equal(out.projects[0].url, undefined);
+    assert.equal(out.projects[0].name, 'Side Project');
+    assert.equal(out.education[0].endDate, undefined);
+    assert.equal(out.education[0].institution, 'State University');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('normalize-json-resume: second run is idempotent (byte-stable output)', () => {
   const dir = join(tmpdir(), 'resume-tailor-idem-' + Date.now());
   mkdirSync(dir, { recursive: true });

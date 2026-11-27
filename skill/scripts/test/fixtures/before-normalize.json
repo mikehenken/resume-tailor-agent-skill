@@ -18,5 +18,20 @@
       "quote": "Excellent partner.",
       "title": "VP"
     }
+  ],
+  "projects": [
+    {
+      "name": "Side Project",
+      "startDate": "2021-03",
+      "endDate": null,
+      "url": ""
+    }
+  ],
+  "education": [
+    {
+      "institution": "State University",
+      "area": "CS",
+      "endDate": null
+    }
   ]
 }
