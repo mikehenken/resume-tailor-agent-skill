@@ -52,6 +52,12 @@ test('scenario: migrated input normalizes then validates successfully', () => {
     assert.ok(Array.isArray(normalized.references), 'customRecommendations should migrate into references');
     assert.equal(normalized.work[0].endDate, undefined, 'null endDate should be removed');
     assert.equal(normalized.work[0].url, undefined, 'empty work.url should be removed');
+    assert.equal(normalized.projects[0].endDate, undefined, 'null projects endDate should be removed');
+    assert.equal(normalized.projects[0].url, undefined, 'empty projects.url should be removed');
+    assert.equal(normalized.projects[1].endDate, '2022-12', 'non-null projects endDate should be kept');
+    assert.equal(normalized.projects[1].url, 'https://example.com/shipped', 'non-empty projects.url should be kept');
+    assert.equal(normalized.education[0].endDate, undefined, 'null education endDate should be removed');
+    assert.equal(normalized.education[1].endDate, '2016-05', 'non-null education endDate should be kept');
 
     const validateResult = runScript('validate-resume.mjs', [input, schema]);
     assert.equal(validateResult.status, 0, validateResult.stderr || validateResult.stdout);
