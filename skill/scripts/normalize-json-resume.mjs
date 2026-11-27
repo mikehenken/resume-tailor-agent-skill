@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Normalize resume JSON toward JSON Resume schema validation hygiene.
- * - Omits endDate when null (current role).
- * - Omits work.url when empty string (invalid uri format).
+ * - Omits endDate when null (current role) in work, projects, and education.
+ * - Omits url when empty string (invalid uri format) in work and projects.
  * - Migrates customRecommendations -> references (schema + extension fields).
  * - Sets $schema for editor/tooling.
  *
@@ -39,16 +39,19 @@ await runCli(async (argv) => {
     });
   }
 
-  if (Array.isArray(data.work)) {
-    for (const w of data.work) {
-      if (!w || typeof w !== 'object') {
+  for (const section of ['work', 'projects', 'education']) {
+    if (!Array.isArray(data[section])) {
+      continue;
+    }
+    for (const entry of data[section]) {
+      if (!entry || typeof entry !== 'object') {
         continue;
       }
-      if (w.endDate === null) {
-        delete w.endDate;
+      if (entry.endDate === null) {
+        delete entry.endDate;
       }
-      if (w.url === '') {
-        delete w.url;
+      if (section !== 'education' && entry.url === '') {
+        delete entry.url;
       }
     }
   }
